@@ -1,0 +1,7 @@
+{
+  "name": "@link/shared",
+  "version": "1.0.0",
+  "description": "Shared constants, types and utilities",
+  "main": "src/index.js",
+  "scripts": {}
+}

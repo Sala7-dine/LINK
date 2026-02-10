@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: link_mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - '27017:27017'
+    networks:
+      - link_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: link_backend
+    restart: unless-stopped
+    env_file: ./apps/backend/.env
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/link_db
+    ports:
+      - '5000:5000'
+    depends_on:
+      - mongo
+    volumes:
+      - uploads:/app/apps/backend/uploads
+    networks:
+      - link_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: link_frontend
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    networks:
+      - link_network
+
+volumes:
+  mongo_data:
+  uploads:
+
+networks:
+  link_network:
+    driver: bridge
