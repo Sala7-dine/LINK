@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const argon2 = require('argon2');
 
 const userSchema = new mongoose.Schema(
@@ -24,8 +25,13 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['student', 'admin', 'superadmin'],
+      enum: ['student', 'school_admin', 'super_admin'],
       default: 'student',
+    },
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'School',
+      index: true,
     },
     school: {
       type: mongoose.Schema.Types.ObjectId,
@@ -74,13 +80,24 @@ const userSchema = new mongoose.Schema(
 // Hash password before save
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password') || !this.password) return next();
-  this.password = await argon2.hash(this.password);
+  const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
+  this.password = await bcrypt.hash(this.password, saltRounds);
+  next();
+});
+
+// Keep legacy school field in sync while transitioning to tenantId.
+userSchema.pre('save', function (next) {
+  if (!this.tenantId && this.school) this.tenantId = this.school;
+  if (!this.school && this.tenantId) this.school = this.tenantId;
   next();
 });
 
 // Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return argon2.verify(this.password, candidatePassword);
+  if (typeof this.password === 'string' && this.password.startsWith('$argon2')) {
+    return argon2.verify(this.password, candidatePassword);
+  }
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 // Remove sensitive fields from JSON output

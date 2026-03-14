@@ -4,7 +4,7 @@ const Company = require('../models/Company');
 const getCompanies = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, search, city, tech, status = 'approved' } = req.query;
-    const query = {};
+    const query = { tenantId: req.tenantId };
     if (status) query.status = status;
     if (city) query.city = new RegExp(city, 'i');
     if (tech) query.technologies = new RegExp(tech, 'i');
@@ -25,7 +25,7 @@ const getCompanies = async (req, res, next) => {
 // GET /api/v1/companies/:id
 const getCompany = async (req, res, next) => {
   try {
-    const company = await Company.findById(req.params.id);
+    const company = await Company.findOne({ _id: req.params.id, tenantId: req.tenantId });
     if (!company) return res.status(404).json({ status: 'fail', message: 'Company not found' });
     res.status(200).json({ status: 'success', data: { company } });
   } catch (err) {
@@ -36,7 +36,12 @@ const getCompany = async (req, res, next) => {
 // POST /api/v1/companies
 const createCompany = async (req, res, next) => {
   try {
-    const company = await Company.create({ ...req.body, addedBy: req.user._id, status: 'pending' });
+    const company = await Company.create({
+      ...req.body,
+      tenantId: req.tenantId,
+      addedBy: req.user._id,
+      status: 'pending',
+    });
     res.status(201).json({ status: 'success', data: { company } });
   } catch (err) {
     next(err);
@@ -46,7 +51,11 @@ const createCompany = async (req, res, next) => {
 // PATCH /api/v1/companies/:id
 const updateCompany = async (req, res, next) => {
   try {
-    const company = await Company.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const company = await Company.findOneAndUpdate(
+      { _id: req.params.id, tenantId: req.tenantId },
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!company) return res.status(404).json({ status: 'fail', message: 'Company not found' });
     res.status(200).json({ status: 'success', data: { company } });
   } catch (err) {
@@ -57,7 +66,7 @@ const updateCompany = async (req, res, next) => {
 // DELETE /api/v1/companies/:id (admin)
 const deleteCompany = async (req, res, next) => {
   try {
-    const company = await Company.findByIdAndDelete(req.params.id);
+    const company = await Company.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
     if (!company) return res.status(404).json({ status: 'fail', message: 'Company not found' });
     res.status(204).json({ status: 'success', data: null });
   } catch (err) {
@@ -72,7 +81,11 @@ const moderateCompany = async (req, res, next) => {
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ status: 'fail', message: 'Status must be approved or rejected' });
     }
-    const company = await Company.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const company = await Company.findOneAndUpdate(
+      { _id: req.params.id, tenantId: req.tenantId },
+      { status },
+      { new: true }
+    );
     res.status(200).json({ status: 'success', data: { company } });
   } catch (err) {
     next(err);

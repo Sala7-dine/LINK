@@ -6,9 +6,9 @@ const upload = require('../middleware/upload');
 const router = express.Router();
 
 router.use(authenticate);
-router.get('/', authorize('superadmin'), getSchools);
-router.post('/', authorize('superadmin'), createSchool);
-router.patch('/:id', authorize('admin', 'superadmin'), updateSchool);
-router.post('/:id/import-students', authorize('admin', 'superadmin'), upload.single('csv'), importStudents);
+router.get('/', authorize('super_admin'), getSchools);
+router.post('/', authorize('super_admin'), createSchool);
+router.patch('/:id', authorize('school_admin', 'super_admin'), updateSchool);
+router.post('/:id/import-students', authorize('school_admin', 'super_admin'), upload.single('csv'), importStudents);
 
 module.exports = router;

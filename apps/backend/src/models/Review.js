@@ -16,6 +16,12 @@ const reviewSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
     },
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'School',
+      required: true,
+      index: true,
+    },
 
     // Ratings
     globalRating: { type: Number, required: true, min: 1, max: 5 },
@@ -66,5 +72,6 @@ const reviewSchema = new mongoose.Schema(
 
 // One review per user per company
 reviewSchema.index({ company: 1, author: 1 }, { unique: true });
+reviewSchema.index({ tenantId: 1, company: 1, status: 1 });
 
 module.exports = mongoose.model('Review', reviewSchema);

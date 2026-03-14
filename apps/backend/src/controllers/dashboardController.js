@@ -3,10 +3,10 @@ const Review = require('../models/Review');
 const Application = require('../models/Application');
 const Company = require('../models/Company');
 
-// GET /api/v1/dashboard  (admin – school-scoped)
+// GET /api/v1/dashboard  (school_admin – tenant-scoped)
 const getDashboard = async (req, res, next) => {
   try {
-    const schoolId = req.user.school;
+    const tenantId = req.tenantId;
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -18,19 +18,12 @@ const getDashboard = async (req, res, next) => {
       topCompanies,
       applicationsByStatus,
     ] = await Promise.all([
-      User.countDocuments({ school: schoolId, role: 'student', isActive: true }),
-      Application.countDocuments({ status: 'accepted' }).populate({ path: 'student', match: { school: schoolId } }),
-      Review.countDocuments({ school: schoolId, createdAt: { $gte: firstDayOfMonth } }),
+      User.countDocuments({ tenantId, role: 'student', isActive: true }),
+      Application.countDocuments({ tenantId, status: 'accepted' }),
+      Review.countDocuments({ tenantId, createdAt: { $gte: firstDayOfMonth } }),
+      Application.countDocuments({ tenantId, createdAt: { $gte: firstDayOfMonth } }),
       Application.aggregate([
-        { $lookup: { from: 'users', localField: 'student', foreignField: '_id', as: 'studentData' } },
-        { $unwind: '$studentData' },
-        { $match: { 'studentData.school': schoolId, createdAt: { $gte: firstDayOfMonth } } },
-        { $count: 'total' },
-      ]),
-      Application.aggregate([
-        { $lookup: { from: 'users', localField: 'student', foreignField: '_id', as: 'studentData' } },
-        { $unwind: '$studentData' },
-        { $match: { 'studentData.school': schoolId, status: 'accepted' } },
+        { $match: { tenantId, status: 'accepted' } },
         { $lookup: { from: 'offers', localField: 'offer', foreignField: '_id', as: 'offerData' } },
         { $unwind: '$offerData' },
         { $group: { _id: '$offerData.companyName', count: { $sum: 1 } } },
@@ -38,9 +31,7 @@ const getDashboard = async (req, res, next) => {
         { $limit: 10 },
       ]),
       Application.aggregate([
-        { $lookup: { from: 'users', localField: 'student', foreignField: '_id', as: 'studentData' } },
-        { $unwind: '$studentData' },
-        { $match: { 'studentData.school': schoolId } },
+        { $match: { tenantId } },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
     ]);
@@ -56,7 +47,7 @@ const getDashboard = async (req, res, next) => {
           totalStudents,
           placementRate,
           reviewsThisMonth,
-          applicationsThisMonth: applicationsThisMonth[0]?.total || 0,
+          applicationsThisMonth,
         },
         topCompanies,
         applicationsByStatus,
@@ -67,7 +58,7 @@ const getDashboard = async (req, res, next) => {
   }
 };
 
-// GET /api/v1/dashboard/superadmin  (superadmin)
+// GET /api/v1/dashboard/superadmin  (super_admin)
 const getSuperAdminDashboard = async (req, res, next) => {
   try {
     const [totalSchools, totalUsers, totalReviews, totalCompanies] = await Promise.all([

@@ -67,7 +67,7 @@ export default function ProfilePage() {
         <div>
           <p className="font-semibold text-lg">{user?.name}</p>
           <p className="text-sm text-gray-500">{user?.email}</p>
-          <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block capitalize ${user?.role === 'admin' ? 'bg-orange-100 text-orange-600' : 'bg-primary-50 text-primary-600'}`}>{user?.role}</span>
+          <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block capitalize ${user?.role === 'school_admin' ? 'bg-orange-100 text-orange-600' : 'bg-primary-50 text-primary-600'}`}>{user?.role}</span>
         </div>
       </div>
 

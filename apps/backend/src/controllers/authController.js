@@ -1,13 +1,15 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
+const School = require('../models/School');
 const emailService = require('../services/emailService');
 
-const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+const generateTokens = (user) => {
+  const payload = { id: user._id, role: user.role, tenantId: user.tenantId || null };
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '15m',
   });
-  const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, {
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   });
   return { accessToken, refreshToken };
@@ -16,31 +18,9 @@ const generateTokens = (userId) => {
 // POST /api/v1/auth/register
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, schoolId } = req.body;
-
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(409).json({ status: 'fail', message: 'Email already registered' });
-    }
-
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const user = await User.create({
-      name,
-      email,
-      password,
-      school: schoolId || null,
-      verificationToken,
-    });
-
-    await emailService.sendVerificationEmail(user.email, verificationToken);
-
-    const { accessToken, refreshToken } = generateTokens(user._id);
-    await User.findByIdAndUpdate(user._id, { refreshToken });
-
-    res.status(201).json({
-      status: 'success',
-      message: 'Registration successful. Please verify your email.',
-      data: { user, accessToken, refreshToken },
+    return res.status(403).json({
+      status: 'fail',
+      message: 'Student self-registration is disabled. Please contact your school administrator for an invitation.',
     });
   } catch (err) {
     next(err);
@@ -66,12 +46,63 @@ const login = async (req, res, next) => {
       return res.status(403).json({ status: 'fail', message: 'Account suspended' });
     }
 
-    const { accessToken, refreshToken } = generateTokens(user._id);
+    const { accessToken, refreshToken } = generateTokens(user);
     await User.findByIdAndUpdate(user._id, { refreshToken });
 
     res.status(200).json({
       status: 'success',
       data: { user, accessToken, refreshToken },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/v1/auth/register-school
+const registerSchool = async (req, res, next) => {
+  try {
+    const { schoolName, adminName, adminEmail, password } = req.body;
+
+    const existingUser = await User.findOne({ email: adminEmail });
+    if (existingUser) {
+      return res.status(409).json({ status: 'fail', message: 'Admin email already registered' });
+    }
+
+    const normalizedDomain = adminEmail.split('@')[1]?.toLowerCase();
+    const existingSchool = normalizedDomain
+      ? await School.findOne({ domain: normalizedDomain })
+      : await School.findOne({ name: schoolName });
+
+    if (existingSchool) {
+      return res.status(409).json({ status: 'fail', message: 'A school tenant already exists for this name/domain' });
+    }
+
+    const school = await School.create({
+      name: schoolName,
+      domain: normalizedDomain,
+    });
+
+    const adminUser = await User.create({
+      name: adminName,
+      email: adminEmail,
+      password,
+      role: 'school_admin',
+      tenantId: school._id,
+      school: school._id,
+      isVerified: true,
+    });
+
+    const { accessToken, refreshToken } = generateTokens(adminUser);
+    await User.findByIdAndUpdate(adminUser._id, { refreshToken });
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        school,
+        user: adminUser,
+        accessToken,
+        refreshToken,
+      },
     });
   } catch (err) {
     next(err);
@@ -90,7 +121,7 @@ const refreshToken = async (req, res, next) => {
       return res.status(401).json({ status: 'fail', message: 'Invalid refresh token' });
     }
 
-    const tokens = generateTokens(user._id);
+    const tokens = generateTokens(user);
     await User.findByIdAndUpdate(user._id, { refreshToken: tokens.refreshToken });
 
     res.status(200).json({ status: 'success', data: tokens });
@@ -168,9 +199,9 @@ const resetPassword = async (req, res, next) => {
 
 // OAuth callback helper
 const oauthCallback = async (req, res) => {
-  const { accessToken, refreshToken } = generateTokens(req.user._id);
+  const { accessToken, refreshToken } = generateTokens(req.user);
   await User.findByIdAndUpdate(req.user._id, { refreshToken });
   res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`);
 };
 
-module.exports = { register, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback };
+module.exports = { register, registerSchool, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback };

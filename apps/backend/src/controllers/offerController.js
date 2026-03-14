@@ -6,7 +6,7 @@ const aggregatorService = require('../services/aggregatorService');
 const getOffers = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, search, location, remote, tech, contractType, source } = req.query;
-    const query = { isActive: true };
+    const query = { isActive: true, tenantId: req.tenantId };
     if (location) query.location = new RegExp(location, 'i');
     if (remote === 'true') query.isRemote = true;
     if (tech) query.technologies = new RegExp(tech, 'i');
@@ -29,7 +29,7 @@ const getOffers = async (req, res, next) => {
 // GET /api/v1/offers/:id
 const getOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findById(req.params.id).populate('company', 'name logo city averageRating');
+    const offer = await Offer.findOne({ _id: req.params.id, tenantId: req.tenantId }).populate('company', 'name logo city averageRating');
     if (!offer) return res.status(404).json({ status: 'fail', message: 'Offer not found' });
     res.status(200).json({ status: 'success', data: { offer } });
   } catch (err) {
@@ -40,7 +40,7 @@ const getOffer = async (req, res, next) => {
 // POST /api/v1/offers (admin)
 const createOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.create({ ...req.body, school: req.user.school });
+    const offer = await Offer.create({ ...req.body, school: req.tenantId, tenantId: req.tenantId });
     res.status(201).json({ status: 'success', data: { offer } });
   } catch (err) {
     next(err);
@@ -50,7 +50,7 @@ const createOffer = async (req, res, next) => {
 // DELETE /api/v1/offers/:id (admin)
 const deleteOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findByIdAndDelete(req.params.id);
+    const offer = await Offer.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
     if (!offer) return res.status(404).json({ status: 'fail', message: 'Offer not found' });
     res.status(204).json({ status: 'success', data: null });
   } catch (err) {
@@ -74,7 +74,7 @@ const syncExternalOffers = async (req, res, next) => {
 // GET /api/v1/offers/applications/me
 const getMyApplications = async (req, res, next) => {
   try {
-    const applications = await Application.find({ student: req.user._id })
+    const applications = await Application.find({ student: req.user._id, tenantId: req.tenantId })
       .populate('offer', 'title companyName location contractType technologies')
       .sort('-updatedAt');
     res.status(200).json({ status: 'success', data: { applications } });
@@ -89,6 +89,7 @@ const applyToOffer = async (req, res, next) => {
     const application = await Application.create({
       student: req.user._id,
       offer: req.params.id,
+      tenantId: req.tenantId,
       status: req.body.status || 'interested',
     });
     res.status(201).json({ status: 'success', data: { application } });
@@ -101,7 +102,7 @@ const applyToOffer = async (req, res, next) => {
 const updateApplicationStatus = async (req, res, next) => {
   try {
     const application = await Application.findOneAndUpdate(
-      { _id: req.params.id, student: req.user._id },
+      { _id: req.params.id, student: req.user._id, tenantId: req.tenantId },
       { status: req.body.status, notes: req.body.notes },
       { new: true, runValidators: true }
     );

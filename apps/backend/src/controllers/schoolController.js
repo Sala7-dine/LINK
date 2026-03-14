@@ -44,7 +44,15 @@ const importStudents = async (req, res, next) => {
       if (!email) continue;
       const exists = await User.findOne({ email });
       if (!exists) {
-        await User.create({ name, email, promotion, school: req.params.id, role: 'student', password: Math.random().toString(36).slice(-10) });
+        await User.create({
+          name,
+          email,
+          promotion,
+          school: req.params.id,
+          tenantId: req.params.id,
+          role: 'student',
+          password: Math.random().toString(36).slice(-10),
+        });
         created++;
       }
     }

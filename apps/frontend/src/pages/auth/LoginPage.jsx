@@ -12,6 +12,12 @@ const schema = z.object({
   password: z.string().min(1, 'Mot de passe requis'),
 });
 
+const getDashboardPathByRole = (role) => {
+  if (role === 'school_admin') return '/admin/dashboard';
+  if (role === 'super_admin') return '/platform/dashboard';
+  return '/student/dashboard';
+};
+
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -21,7 +27,7 @@ export default function LoginPage() {
     try {
       const { data } = await authService.login(values);
       dispatch(setCredentials(data.data));
-      navigate('/dashboard');
+      navigate(getDashboardPathByRole(data.data?.user?.role));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Identifiants incorrects');
     }
@@ -55,7 +61,7 @@ export default function LoginPage() {
       </div>
       <p className="mt-6 text-center text-sm text-gray-500">
         Pas encore de compte ?{' '}
-        <Link to="/register" className="text-primary-600 font-medium hover:underline">S'inscrire</Link>
+        <Link to="/register-school" className="text-primary-600 font-medium hover:underline">Inscrire une ecole</Link>
       </p>
     </div>
   );

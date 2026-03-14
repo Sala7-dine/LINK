@@ -12,6 +12,12 @@ const applicationSchema = new mongoose.Schema(
       ref: 'Offer',
       required: true,
     },
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'School',
+      required: true,
+      index: true,
+    },
     status: {
       type: String,
       enum: ['interested', 'applied', 'interview', 'rejected', 'accepted'],

@@ -16,10 +16,10 @@ export default function DashboardPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => dashboardService.get().then((r) => r.data.data),
-    enabled: ['admin', 'superadmin'].includes(user?.role),
+    enabled: ['school_admin', 'super_admin'].includes(user?.role),
   });
 
-  if (!['admin', 'superadmin'].includes(user?.role)) {
+  if (!['school_admin', 'super_admin'].includes(user?.role)) {
     return (
       <div>
         <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>

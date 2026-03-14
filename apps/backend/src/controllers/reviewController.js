@@ -1,13 +1,13 @@
 const Review = require('../models/Review');
 const Company = require('../models/Company');
 
-const recalcCompanyRating = async (companyId) => {
+const recalcCompanyRating = async (companyId, tenantId) => {
   const stats = await Review.aggregate([
-    { $match: { company: companyId, status: 'approved' } },
+    { $match: { company: companyId, tenantId, status: 'approved' } },
     { $group: { _id: '$company', avgRating: { $avg: '$globalRating' }, count: { $sum: 1 } } },
   ]);
   if (stats.length > 0) {
-    await Company.findByIdAndUpdate(companyId, {
+    await Company.findOneAndUpdate({ _id: companyId, tenantId }, {
       averageRating: Math.round(stats[0].avgRating * 10) / 10,
       reviewCount: stats[0].count,
     });
@@ -19,7 +19,7 @@ const getReviews = async (req, res, next) => {
   try {
     const { companyId } = req.params;
     const { page = 1, limit = 10, status = 'approved' } = req.query;
-    const query = { status };
+    const query = { status, tenantId: req.tenantId };
     if (companyId) query.company = companyId;
 
     const total = await Review.countDocuments(query);
@@ -42,7 +42,8 @@ const createReview = async (req, res, next) => {
       ...req.body,
       company: req.params.companyId,
       author: req.user._id,
-      school: req.user.school,
+      school: req.tenantId,
+      tenantId: req.tenantId,
       attachments: req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [],
     });
     res.status(201).json({ status: 'success', data: { review } });
@@ -54,7 +55,7 @@ const createReview = async (req, res, next) => {
 // PATCH /api/v1/reviews/:id
 const updateReview = async (req, res, next) => {
   try {
-    const review = await Review.findOne({ _id: req.params.id, author: req.user._id });
+    const review = await Review.findOne({ _id: req.params.id, author: req.user._id, tenantId: req.tenantId });
     if (!review) return res.status(404).json({ status: 'fail', message: 'Review not found or not yours' });
     Object.assign(review, req.body);
     review.status = 'pending'; // re-moderate after edit
@@ -69,11 +70,11 @@ const updateReview = async (req, res, next) => {
 const deleteReview = async (req, res, next) => {
   try {
     const filter = req.user.role === 'student'
-      ? { _id: req.params.id, author: req.user._id }
-      : { _id: req.params.id };
+      ? { _id: req.params.id, author: req.user._id, tenantId: req.tenantId }
+      : { _id: req.params.id, tenantId: req.tenantId };
     const review = await Review.findOneAndDelete(filter);
     if (!review) return res.status(404).json({ status: 'fail', message: 'Review not found' });
-    await recalcCompanyRating(review.company);
+    await recalcCompanyRating(review.company, req.tenantId);
     res.status(204).json({ status: 'success', data: null });
   } catch (err) {
     next(err);
@@ -83,7 +84,7 @@ const deleteReview = async (req, res, next) => {
 // POST /api/v1/reviews/:id/like
 const likeReview = async (req, res, next) => {
   try {
-    const review = await Review.findById(req.params.id);
+    const review = await Review.findOne({ _id: req.params.id, tenantId: req.tenantId });
     if (!review) return res.status(404).json({ status: 'fail', message: 'Review not found' });
 
     const idx = review.likes.indexOf(req.user._id);
@@ -105,7 +106,7 @@ const likeReview = async (req, res, next) => {
 const flagReview = async (req, res, next) => {
   try {
     const review = await Review.findByIdAndUpdate(
-      req.params.id,
+      { _id: req.params.id, tenantId: req.tenantId },
       { $addToSet: { flaggedBy: req.user._id }, status: 'flagged' },
       { new: true }
     );
@@ -123,9 +124,9 @@ const moderateReview = async (req, res, next) => {
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ status: 'fail', message: 'Status must be approved or rejected' });
     }
-    const review = await Review.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const review = await Review.findOneAndUpdate({ _id: req.params.id, tenantId: req.tenantId }, { status }, { new: true });
     if (!review) return res.status(404).json({ status: 'fail', message: 'Review not found' });
-    if (status === 'approved') await recalcCompanyRating(review.company);
+    if (status === 'approved') await recalcCompanyRating(review.company, req.tenantId);
     res.status(200).json({ status: 'success', data: { review } });
   } catch (err) {
     next(err);

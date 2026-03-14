@@ -1,12 +1,25 @@
 const express = require('express');
 const passport = require('passport');
 const { body } = require('express-validator');
-const { register, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback } = require('../controllers/authController');
+const { register, registerSchool, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback } = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { validate } = require('../middleware/validate');
 
 const router = express.Router();
+
+router.post(
+  '/register-school',
+  authLimiter,
+  [
+    body('schoolName').trim().notEmpty().withMessage('School name is required'),
+    body('adminName').trim().notEmpty().withMessage('Admin name is required'),
+    body('adminEmail').isEmail().normalizeEmail(),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  ],
+  validate,
+  registerSchool
+);
 
 router.post(
   '/register',
@@ -19,7 +32,7 @@ router.post(
   validate,
   register
 );
-
+ 
 router.post(
   '/login',
   authLimiter,

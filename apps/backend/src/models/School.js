@@ -8,6 +8,13 @@ const schoolSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    domain: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      unique: true,
+      sparse: true,
+    },
     slug: {
       type: String,
       unique: true,
