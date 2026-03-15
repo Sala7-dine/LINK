@@ -1,15 +1,32 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, process.env.UPLOAD_DIR || 'uploads/');
+    const uploadDir = process.env.UPLOAD_DIR || 'uploads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `${uuidv4()}${ext}`);
   },
+});
+
+const createUploader = (allowed, errorMessage, maxFileSize) => multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(errorMessage), false);
+    }
+  },
+  limits: { fileSize: maxFileSize || parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 },
 });
 
 const fileFilter = (req, file, cb) => {
@@ -27,4 +44,11 @@ const upload = multer({
   limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 },
 });
 
+const uploadCsv = createUploader(
+  ['text/csv', 'application/vnd.ms-excel', 'application/csv', 'text/plain'],
+  'File type not allowed. Use CSV.',
+  parseInt(process.env.MAX_CSV_FILE_SIZE) || 2 * 1024 * 1024
+);
+
 module.exports = upload;
+module.exports.uploadCsv = uploadCsv;

@@ -1,16 +1,17 @@
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectSidebarOpen } from '../../store/slices/uiSlice';
+import { selectUser } from '../../store/slices/authSlice';
 import {
   HomeIcon,
   BuildingOffice2Icon,
   BriefcaseIcon,
   ViewColumnsIcon,
   UserCircleIcon,
-  ChartBarIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 
-const nav = [
+const baseNav = [
   { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
   { to: '/companies', label: 'Entreprises', icon: BuildingOffice2Icon },
   { to: '/offers', label: 'Offres', icon: BriefcaseIcon },
@@ -20,6 +21,11 @@ const nav = [
 
 export default function Sidebar() {
   const open = useSelector(selectSidebarOpen);
+  const user = useSelector(selectUser);
+  const isSchoolAdmin = ['school_admin', 'super_admin'].includes(user?.role);
+  const nav = isSchoolAdmin
+    ? [...baseNav, { to: '/admin/import-students', label: 'Import etudiants', icon: ArrowUpTrayIcon }]
+    : baseNav;
 
   return (
     <aside className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 z-20 transition-all duration-300 ${open ? 'w-64' : 'w-16'}`}>

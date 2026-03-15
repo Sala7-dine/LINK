@@ -41,3 +41,9 @@ export const userService = {
   uploadAvatar: (formData) => api.patch('/users/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   downloadProfilePdf: () => api.get('/users/me/profile-pdf', { responseType: 'blob' }),
 };
+
+export const schoolService = {
+  importStudents: (schoolId, formData) => api.post(`/schools/${schoolId}/import-students`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+};
