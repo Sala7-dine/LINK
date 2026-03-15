@@ -1,6 +1,11 @@
 const User = require('../models/User');
 const pdfService = require('../services/pdfService');
 
+const getRoleFilterForEditor = (editorRole) => {
+  if (editorRole === 'super_admin') return ['student', 'school_admin', 'super_admin'];
+  return ['student', 'school_admin'];
+};
+
 // GET /api/v1/users/me
 const getMe = async (req, res, next) => {
   try {
@@ -97,10 +102,15 @@ const getAllUsers = async (req, res, next) => {
 // PATCH /api/v1/users/:id/suspend  (admin)
 const suspendUser = async (req, res, next) => {
   try {
+    if (req.params.id === String(req.user._id)) {
+      return res.status(400).json({ status: 'fail', message: 'You cannot suspend your own account' });
+    }
+
+    const isActive = typeof req.body?.isActive === 'boolean' ? req.body.isActive : false;
     const filter = req.user.role === 'super_admin'
       ? { _id: req.params.id }
       : { _id: req.params.id, tenantId: req.tenantId };
-    const user = await User.findOneAndUpdate(filter, { isActive: false }, { new: true });
+    const user = await User.findOneAndUpdate(filter, { isActive }, { new: true });
     if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
     res.status(200).json({ status: 'success', data: { user } });
   } catch (err) {
@@ -108,4 +118,31 @@ const suspendUser = async (req, res, next) => {
   }
 };
 
-module.exports = { getMe, updateMe, deleteMe, generateProfilePdf, uploadAvatar, getAllUsers, suspendUser };
+// PATCH /api/v1/users/:id/role (school_admin/super_admin)
+const updateUserRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    const allowedRoles = getRoleFilterForEditor(req.user.role);
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(403).json({ status: 'fail', message: 'Role not allowed for your account' });
+    }
+
+    if (req.params.id === String(req.user._id)) {
+      return res.status(400).json({ status: 'fail', message: 'You cannot change your own role' });
+    }
+
+    const filter = req.user.role === 'super_admin'
+      ? { _id: req.params.id }
+      : { _id: req.params.id, tenantId: req.tenantId, role: { $ne: 'super_admin' } };
+
+    const user = await User.findOneAndUpdate(filter, { role }, { new: true, runValidators: true });
+    if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
+
+    res.status(200).json({ status: 'success', data: { user } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getMe, updateMe, deleteMe, generateProfilePdf, uploadAvatar, getAllUsers, suspendUser, updateUserRole };

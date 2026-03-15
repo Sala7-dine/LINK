@@ -9,6 +9,7 @@ import {
   ViewColumnsIcon,
   UserCircleIcon,
   ArrowUpTrayIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 
 const baseNav = [
@@ -24,7 +25,11 @@ export default function Sidebar() {
   const user = useSelector(selectUser);
   const isSchoolAdmin = ['school_admin', 'super_admin'].includes(user?.role);
   const nav = isSchoolAdmin
-    ? [...baseNav, { to: '/admin/import-students', label: 'Import etudiants', icon: ArrowUpTrayIcon }]
+    ? [
+      ...baseNav,
+      { to: '/admin/import-students', label: 'Import etudiants', icon: ArrowUpTrayIcon },
+      { to: '/admin/users', label: 'Gestion users', icon: UsersIcon },
+    ]
     : baseNav;
 
   return (

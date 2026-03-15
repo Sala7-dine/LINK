@@ -16,6 +16,7 @@ import OfferDetailPage from './pages/offers/OfferDetailPage';
 import KanbanPage from './pages/offers/KanbanPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ImportStudentsPage from './pages/schools/ImportStudentsPage';
+import UsersManagementPage from './pages/users/UsersManagementPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const getDashboardPathByRole = (role) => {
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin/import-students" element={<ProtectedRoute roles={['school_admin', 'super_admin']}><ImportStudentsPage /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute roles={['school_admin', 'super_admin']}><UsersManagementPage /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

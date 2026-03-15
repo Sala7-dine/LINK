@@ -37,6 +37,9 @@ export const dashboardService = {
 };
 
 export const userService = {
+  getAll: (params) => api.get('/users', { params }),
+  updateRole: (id, role) => api.patch(`/users/${id}/role`, { role }),
+  setActiveStatus: (id, isActive) => api.patch(`/users/${id}/suspend`, { isActive }),
   updateMe: (data) => api.patch('/users/me', data),
   uploadAvatar: (formData) => api.patch('/users/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   downloadProfilePdf: () => api.get('/users/me/profile-pdf', { responseType: 'blob' }),
