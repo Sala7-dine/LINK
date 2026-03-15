@@ -4,6 +4,7 @@ export const authService = {
   register: (data) => api.post('/auth/register', data),
   registerSchool: (data) => api.post('/auth/register-school', data),
   login: (data) => api.post('/auth/login', data),
+  resetPassword: (token, data) => api.patch(`/auth/reset-password/${token}`, data),
   logout: () => api.post('/auth/logout'),
   getMe: () => api.get('/users/me'),
 };

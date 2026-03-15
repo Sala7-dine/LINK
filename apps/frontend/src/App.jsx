@@ -8,6 +8,7 @@ import AuthLayout from './components/layout/AuthLayout';
 // Pages
 import LoginPage from './pages/auth/LoginPage';
 import RegisterSchoolPage from './pages/auth/RegisterSchoolPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import CompaniesPage from './pages/companies/CompaniesPage';
 import CompanyDetailPage from './pages/companies/CompanyDetailPage';
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Navigate to="/register-school" replace />} />
           <Route path="/register-school" element={<RegisterSchoolPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         </Route>
 
         {/* App */}
