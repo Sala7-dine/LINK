@@ -4,6 +4,31 @@ const crypto = require('crypto');
 const fs = require('fs');
 const emailService = require('../services/emailService');
 
+const ensureSchoolAccess = (req, schoolId) => {
+  if (req.user.role !== 'school_admin') return true;
+  return String(req.user.tenantId) === String(schoolId);
+};
+
+const createAndInviteStudent = async ({ schoolId, name, email, promotion }) => {
+  const user = await User.create({
+    name,
+    email,
+    promotion,
+    school: schoolId,
+    tenantId: schoolId,
+    role: 'student',
+    password: Math.random().toString(36).slice(-10),
+  });
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  user.passwordResetToken = resetToken;
+  user.passwordResetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+  await user.save({ validateBeforeSave: false });
+
+  await emailService.sendPasswordResetEmail(user.email, resetToken);
+  return user;
+};
+
 // GET /api/v1/schools (superadmin)
 const getSchools = async (req, res, next) => {
   try {
@@ -38,6 +63,10 @@ const updateSchool = async (req, res, next) => {
 // POST /api/v1/schools/:id/import-students  (admin - CSV bulk import)
 const importStudents = async (req, res, next) => {
   try {
+    if (!ensureSchoolAccess(req, req.params.id)) {
+      return res.status(403).json({ status: 'fail', message: 'You can only import students for your own school' });
+    }
+
     if (!req.file) return res.status(400).json({ status: 'fail', message: 'No CSV file uploaded' });
     const csv = fs.readFileSync(req.file.path, 'utf-8');
     const lines = csv.split('\n').slice(1).filter(Boolean);
@@ -50,26 +79,11 @@ const importStudents = async (req, res, next) => {
       if (!email) continue;
       const exists = await User.findOne({ email });
       if (!exists) {
-        const user = await User.create({
-          name,
-          email,
-          promotion,
-          school: req.params.id,
-          tenantId: req.params.id,
-          role: 'student',
-          password: Math.random().toString(36).slice(-10),
-        });
-
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        user.passwordResetToken = resetToken;
-        user.passwordResetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
-        await user.save({ validateBeforeSave: false });
-
         try {
-          await emailService.sendPasswordResetEmail(user.email, resetToken);
+          await createAndInviteStudent({ schoolId: req.params.id, name, email, promotion });
           invited++;
         } catch (emailError) {
-          emailFailures.push(user.email);
+          emailFailures.push(email);
         }
 
         created++;
@@ -86,8 +100,35 @@ const importStudents = async (req, res, next) => {
       data: { created, invited, emailFailures },
     });
   } catch (err) {
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     next(err);
   }
 };
 
-module.exports = { getSchools, createSchool, updateSchool, importStudents };
+// POST /api/v1/schools/:id/invite-student (admin - single invite)
+const inviteStudent = async (req, res, next) => {
+  try {
+    if (!ensureSchoolAccess(req, req.params.id)) {
+      return res.status(403).json({ status: 'fail', message: 'You can only invite students for your own school' });
+    }
+
+    const { name, email, promotion } = req.body;
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(409).json({ status: 'fail', message: 'Email already exists' });
+    }
+
+    await createAndInviteStudent({ schoolId: req.params.id, name, email, promotion });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Student invited successfully. Password setup email sent.',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getSchools, createSchool, updateSchool, importStudents, inviteStudent };

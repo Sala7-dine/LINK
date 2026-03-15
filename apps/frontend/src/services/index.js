@@ -46,4 +46,5 @@ export const schoolService = {
   importStudents: (schoolId, formData) => api.post(`/schools/${schoolId}/import-students`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  inviteStudent: (schoolId, data) => api.post(`/schools/${schoolId}/invite-student`, data),
 };
