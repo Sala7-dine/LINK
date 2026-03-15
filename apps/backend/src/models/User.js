@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const argon2 = require('argon2');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import argon2 from 'argon2';
 
 const userSchema = new mongoose.Schema(
   {
@@ -111,4 +111,4 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

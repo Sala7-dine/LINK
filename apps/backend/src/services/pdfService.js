@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
 
 const generateCandidateProfile = async (user) => {
   const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
@@ -46,4 +46,4 @@ const generateCandidateProfile = async (user) => {
   return pdfBuffer;
 };
 
-module.exports = { generateCandidateProfile };
+export { generateCandidateProfile };

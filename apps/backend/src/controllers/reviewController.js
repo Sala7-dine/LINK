@@ -1,5 +1,5 @@
-const Review = require('../models/Review');
-const Company = require('../models/Company');
+import Review from '../models/Review.js';
+import Company from '../models/Company.js';
 
 const recalcCompanyRating = async (companyId, tenantId) => {
   const stats = await Review.aggregate([
@@ -133,4 +133,4 @@ const moderateReview = async (req, res, next) => {
   }
 };
 
-module.exports = { getReviews, createReview, updateReview, deleteReview, likeReview, flagReview, moderateReview };
+export { getReviews, createReview, updateReview, deleteReview, likeReview, flagReview, moderateReview };

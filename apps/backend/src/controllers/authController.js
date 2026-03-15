@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const User = require('../models/User');
-const School = require('../models/School');
-const emailService = require('../services/emailService');
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import User from '../models/User.js';
+import School from '../models/School.js';
+import { sendPasswordResetEmail } from '../services/emailService.js';
 
 const generateTokens = (user) => {
   const payload = { id: user._id, role: user.role, tenantId: user.tenantId || null };
@@ -170,7 +170,7 @@ const forgotPassword = async (req, res, next) => {
     user.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 min
     await user.save({ validateBeforeSave: false });
 
-    await emailService.sendPasswordResetEmail(user.email, resetToken);
+    await sendPasswordResetEmail(user.email, resetToken);
     res.status(200).json({ status: 'success', message: 'If this email exists, a reset link was sent' });
   } catch (err) {
     next(err);
@@ -204,4 +204,4 @@ const oauthCallback = async (req, res) => {
   res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`);
 };
 
-module.exports = { register, registerSchool, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback };
+export { register, registerSchool, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback };

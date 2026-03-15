@@ -38,4 +38,4 @@ const globalErrorHandler = (err, req, res, next) => {
   return res.status(statusCode).json({ status, message: statusCode < 500 ? err.message : 'Something went wrong' });
 };
 
-module.exports = { notFound, globalErrorHandler };
+export { notFound, globalErrorHandler };

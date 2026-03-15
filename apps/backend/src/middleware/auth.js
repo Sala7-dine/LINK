@@ -1,4 +1,4 @@
-const passport = require('passport');
+import passport from 'passport';
 
 const authenticate = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -23,4 +23,4 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { authenticate, authorize };
+export { authenticate, authorize };

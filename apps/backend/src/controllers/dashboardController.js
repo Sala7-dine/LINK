@@ -1,7 +1,8 @@
-const User = require('../models/User');
-const Review = require('../models/Review');
-const Application = require('../models/Application');
-const Company = require('../models/Company');
+import User from '../models/User.js';
+import Review from '../models/Review.js';
+import Application from '../models/Application.js';
+import Company from '../models/Company.js';
+import School from '../models/School.js';
 
 // GET /api/v1/dashboard  (school_admin – tenant-scoped)
 const getDashboard = async (req, res, next) => {
@@ -62,7 +63,7 @@ const getDashboard = async (req, res, next) => {
 const getSuperAdminDashboard = async (req, res, next) => {
   try {
     const [totalSchools, totalUsers, totalReviews, totalCompanies] = await Promise.all([
-      require('../models/School').countDocuments({ isActive: true }),
+      School.countDocuments({ isActive: true }),
       User.countDocuments({ isActive: true }),
       Review.countDocuments({ status: 'approved' }),
       Company.countDocuments({ status: 'approved' }),
@@ -77,4 +78,4 @@ const getSuperAdminDashboard = async (req, res, next) => {
   }
 };
 
-module.exports = { getDashboard, getSuperAdminDashboard };
+export { getDashboard, getSuperAdminDashboard };

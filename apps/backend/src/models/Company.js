@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const companySchema = new mongoose.Schema(
   {
@@ -50,4 +50,4 @@ companySchema.pre('save', function (next) {
 
 companySchema.index({ name: 'text', city: 'text', technologies: 'text' });
 
-module.exports = mongoose.model('Company', companySchema);
+export default mongoose.model('Company', companySchema);

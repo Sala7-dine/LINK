@@ -1,5 +1,5 @@
-const axios = require('axios');
-const Offer = require('../models/Offer');
+import axios from 'axios';
+import Offer from '../models/Offer.js';
 
 /**
  * Fetch offers from external APIs and store new ones in DB.
@@ -51,4 +51,4 @@ const fetchAndStore = async (keywords, location) => {
   return inserted;
 };
 
-module.exports = { fetchAndStore };
+export { fetchAndStore };

@@ -1,8 +1,8 @@
-const passport = require('passport');
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
-const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
-const { Strategy: GitHubStrategy } = require('passport-github2');
-const User = require('../models/User');
+import passport from 'passport';
+import {Strategy as JwtStrategy, ExtractJwt} from 'passport-jwt';
+import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
+import {Strategy as GitHubStrategy} from 'passport-github2';
+import User from '../models/User.js';
 
 // ── JWT Strategy ─────────────────────────────────────
 passport.use(

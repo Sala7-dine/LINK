@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -28,4 +28,4 @@ const sendPasswordResetEmail = (to, token) => {
   });
 };
 
-module.exports = { sendEmail, sendVerificationEmail, sendPasswordResetEmail };
+export { sendEmail, sendVerificationEmail, sendPasswordResetEmail };

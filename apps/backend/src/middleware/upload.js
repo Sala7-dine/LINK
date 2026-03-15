@@ -1,7 +1,7 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import {v4 as uuidv4} from 'uuid';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -50,5 +50,5 @@ const uploadCsv = createUploader(
   parseInt(process.env.MAX_CSV_FILE_SIZE) || 2 * 1024 * 1024
 );
 
-module.exports = upload;
-module.exports.uploadCsv = uploadCsv;
+export default upload;
+export {uploadCsv};

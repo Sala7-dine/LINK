@@ -1,8 +1,17 @@
-const express = require('express');
-const { getCompanies, getCompany, createCompany, updateCompany, deleteCompany, moderateCompany } = require('../controllers/companyController');
-const { authenticate, authorize } = require('../middleware/auth');
-const { tenantContext } = require('../middleware/tenant');
-const reviewRoutes = require('./reviewRoutes');
+import express from 'express';
+
+import {
+  getCompanies,
+  getCompany,
+  createCompany,
+  updateCompany,
+  deleteCompany,
+  moderateCompany,
+} from '../controllers/companyController.js';
+
+import {authenticate, authorize} from '../middleware/auth.js';
+import {tenantContext} from '../middleware/tenant.js';
+import reviewRoutes from './reviewRoutes.js';
 
 const router = express.Router();
 
@@ -18,4 +27,4 @@ router.patch('/:id', authorize('school_admin', 'super_admin'), updateCompany);
 router.delete('/:id', authorize('school_admin', 'super_admin'), deleteCompany);
 router.patch('/:id/moderate', authorize('school_admin', 'super_admin'), moderateCompany);
 
-module.exports = router;
+export default router;

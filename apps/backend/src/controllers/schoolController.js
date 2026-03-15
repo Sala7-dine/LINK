@@ -1,8 +1,8 @@
-const School = require('../models/School');
-const User = require('../models/User');
-const crypto = require('crypto');
-const fs = require('fs');
-const emailService = require('../services/emailService');
+import School from '../models/School.js';
+import User from '../models/User.js';
+import crypto from 'crypto';
+import fs from 'fs';
+import { sendPasswordResetEmail } from '../services/emailService.js';
 
 const ensureSchoolAccess = (req, schoolId) => {
   if (req.user.role !== 'school_admin') return true;
@@ -25,7 +25,7 @@ const createAndInviteStudent = async ({ schoolId, name, email, promotion }) => {
   user.passwordResetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
   await user.save({ validateBeforeSave: false });
 
-  await emailService.sendPasswordResetEmail(user.email, resetToken);
+  await sendPasswordResetEmail(user.email, resetToken);
   return user;
 };
 
@@ -131,4 +131,4 @@ const inviteStudent = async (req, res, next) => {
   }
 };
 
-module.exports = { getSchools, createSchool, updateSchool, importStudents, inviteStudent };
+export { getSchools, createSchool, updateSchool, importStudents, inviteStudent };

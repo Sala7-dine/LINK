@@ -1,10 +1,21 @@
-const express = require('express');
-const { body } = require('express-validator');
-const { getMe, updateMe, deleteMe, generateProfilePdf, uploadAvatar, getAllUsers, suspendUser, updateUserRole } = require('../controllers/userController');
-const { authenticate, authorize } = require('../middleware/auth');
-const { tenantContext } = require('../middleware/tenant');
-const { validate } = require('../middleware/validate');
-const upload = require('../middleware/upload');
+import express from 'express';
+import {body} from 'express-validator';
+
+import {
+    getMe,
+    updateMe,
+    deleteMe,
+    generateProfilePdf,
+    uploadAvatar,
+    getAllUsers,
+    suspendUser,
+    updateUserRole,
+} from '../controllers/userController.js';
+
+import {authenticate, authorize} from '../middleware/auth.js';
+import {tenantContext} from '../middleware/tenant.js';
+import {validate} from '../middleware/validate.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -42,4 +53,4 @@ router.patch(
 	updateUserRole
 );
 
-module.exports = router;
+export default router;

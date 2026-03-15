@@ -1,10 +1,18 @@
-const express = require('express');
-const {
-  getOffers, getOffer, createOffer, deleteOffer, syncExternalOffers,
-  getMyApplications, applyToOffer, updateApplicationStatus,
-} = require('../controllers/offerController');
-const { authenticate, authorize } = require('../middleware/auth');
-const { tenantContext } = require('../middleware/tenant');
+import express from 'express';
+
+import {
+  getOffers,
+  getOffer,
+  createOffer,
+  deleteOffer,
+  syncExternalOffers,
+  getMyApplications,
+  applyToOffer,
+  updateApplicationStatus,
+} from '../controllers/offerController.js';
+
+import {authenticate, authorize} from '../middleware/auth.js';
+import {tenantContext} from '../middleware/tenant.js';
 
 const router = express.Router();
 
@@ -19,4 +27,4 @@ router.post('/sync', authorize('school_admin', 'super_admin'), syncExternalOffer
 router.post('/:id/apply', applyToOffer);
 router.patch('/applications/:id', updateApplicationStatus);
 
-module.exports = router;
+export default router;

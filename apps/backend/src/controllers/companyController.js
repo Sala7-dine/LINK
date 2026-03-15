@@ -1,4 +1,4 @@
-const Company = require('../models/Company');
+import Company from '../models/Company.js';
 
 // GET /api/v1/companies
 const getCompanies = async (req, res, next) => {
@@ -92,4 +92,4 @@ const moderateCompany = async (req, res, next) => {
   }
 };
 
-module.exports = { getCompanies, getCompany, createCompany, updateCompany, deleteCompany, moderateCompany };
+export { getCompanies, getCompany, createCompany, updateCompany, deleteCompany, moderateCompany };

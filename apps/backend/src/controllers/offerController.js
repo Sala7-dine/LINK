@@ -1,6 +1,6 @@
-const Offer = require('../models/Offer');
-const Application = require('../models/Application');
-const aggregatorService = require('../services/aggregatorService');
+import Offer from '../models/Offer.js';
+import Application from '../models/Application.js';
+import { fetchAndStore } from '../services/aggregatorService.js';
 
 // GET /api/v1/offers
 const getOffers = async (req, res, next) => {
@@ -62,7 +62,7 @@ const deleteOffer = async (req, res, next) => {
 const syncExternalOffers = async (req, res, next) => {
   try {
     const { keywords = 'stage développeur', location = 'Maroc' } = req.body;
-    const count = await aggregatorService.fetchAndStore(keywords, location);
+    const count = await fetchAndStore(keywords, location);
     res.status(200).json({ status: 'success', message: `Synced ${count} new offers` });
   } catch (err) {
     next(err);
@@ -113,7 +113,7 @@ const updateApplicationStatus = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   getOffers, getOffer, createOffer, deleteOffer, syncExternalOffers,
   getMyApplications, applyToOffer, updateApplicationStatus,
 };

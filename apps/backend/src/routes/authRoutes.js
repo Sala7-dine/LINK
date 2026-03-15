@@ -1,10 +1,22 @@
-const express = require('express');
-const passport = require('passport');
-const { body } = require('express-validator');
-const { register, registerSchool, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback } = require('../controllers/authController');
-const { authenticate } = require('../middleware/auth');
-const { authLimiter } = require('../middleware/rateLimiter');
-const { validate } = require('../middleware/validate');
+import express from 'express';
+import passport from 'passport';
+import {body} from 'express-validator';
+
+import {
+  register,
+  registerSchool,
+  login,
+  refreshToken,
+  logout,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
+  oauthCallback,
+} from '../controllers/authController.js';
+
+import {authenticate} from '../middleware/auth.js';
+import {authLimiter} from '../middleware/rateLimiter.js';
+import {validate} from '../middleware/validate.js';
 
 const router = express.Router();
 
@@ -32,7 +44,7 @@ router.post(
   validate,
   register
 );
- 
+
 router.post(
   '/login',
   authLimiter,
@@ -54,4 +66,4 @@ router.get('/google/callback', passport.authenticate('google', { session: false,
 router.get('/github', passport.authenticate('github', { scope: ['user:email'], session: false }));
 router.get('/github/callback', passport.authenticate('github', { session: false, failureRedirect: '/login' }), oauthCallback);
 
-module.exports = router;
+export default router;

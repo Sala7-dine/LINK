@@ -1,9 +1,9 @@
-const express = require('express');
-const { body } = require('express-validator');
-const { getSchools, createSchool, updateSchool, importStudents, inviteStudent } = require('../controllers/schoolController');
-const { authenticate, authorize } = require('../middleware/auth');
-const { uploadCsv } = require('../middleware/upload');
-const { validate } = require('../middleware/validate');
+import express from 'express';
+import {body} from 'express-validator';
+import {getSchools, createSchool, updateSchool, importStudents, inviteStudent} from '../controllers/schoolController.js';
+import {authenticate, authorize} from '../middleware/auth.js';
+import {uploadCsv} from '../middleware/upload.js';
+import {validate} from '../middleware/validate.js';
 
 const router = express.Router();
 
@@ -24,4 +24,4 @@ router.post(
 	inviteStudent
 );
 
-module.exports = router;
+export default router;

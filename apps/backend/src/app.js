@@ -1,23 +1,23 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const mongoSanitize = require('express-mongo-sanitize');
-const passport = require('passport');
-
-const { globalErrorHandler, notFound } = require('./middleware/errorHandler');
-const { apiLimiter } = require('./middleware/rateLimiter');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import mongoSanitize from 'express-mongo-sanitize';
+import passport from 'passport';
+import {globalErrorHandler, notFound} from './middleware/errorHandler.js';
+import {apiLimiter} from './middleware/rateLimiter.js';
 
 // Routes
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const companyRoutes = require('./routes/companyRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const offerRoutes = require('./routes/offerRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes');
-const schoolRoutes = require('./routes/schoolRoutes');
+import authRoutes from './routes/authRoutes.js';
 
-require('./config/passport');
+import userRoutes from './routes/userRoutes.js';
+import companyRoutes from './routes/companyRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import offerRoutes from './routes/offerRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import schoolRoutes from './routes/schoolRoutes.js';
+
+import './config/passport.js';
 
 const app = express();
 
@@ -65,4 +65,4 @@ app.get('/api/health', (req, res) => {
 app.use(notFound);
 app.use(globalErrorHandler);
 
-module.exports = app;
+export default app;

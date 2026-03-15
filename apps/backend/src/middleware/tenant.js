@@ -7,4 +7,4 @@ const tenantContext = (req, res, next) => {
   next();
 };
 
-module.exports = { tenantContext };
+export { tenantContext };

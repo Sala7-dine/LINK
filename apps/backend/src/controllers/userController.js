@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const pdfService = require('../services/pdfService');
+import User from '../models/User.js';
+import { generateCandidateProfile } from '../services/pdfService.js';
 
 const getRoleFilterForEditor = (editorRole) => {
   if (editorRole === 'super_admin') return ['student', 'school_admin', 'super_admin'];
@@ -54,7 +54,7 @@ const deleteMe = async (req, res, next) => {
 const generateProfilePdf = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate('tenantId', 'name logo primaryColor');
-    const pdfBuffer = await pdfService.generateCandidateProfile(user);
+    const pdfBuffer = await generateCandidateProfile(user);
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="profile-${user._id}.pdf"` });
     res.send(pdfBuffer);
   } catch (err) {
@@ -145,4 +145,4 @@ const updateUserRole = async (req, res, next) => {
   }
 };
 
-module.exports = { getMe, updateMe, deleteMe, generateProfilePdf, uploadAvatar, getAllUsers, suspendUser, updateUserRole };
+export { getMe, updateMe, deleteMe, generateProfilePdf, uploadAvatar, getAllUsers, suspendUser, updateUserRole };
