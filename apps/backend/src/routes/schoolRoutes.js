@@ -1,9 +1,9 @@
 import express from 'express';
-import {body} from 'express-validator';
 import {getSchools, createSchool, updateSchool, importStudents, inviteStudent} from '../controllers/schoolController.js';
 import {authenticate, authorize} from '../middleware/auth.js';
 import {uploadCsv} from '../middleware/upload.js';
-import {validate} from '../middleware/validate.js';
+import {validateBody} from '../middleware/yupValidate.js';
+import {inviteStudentSchema} from '../validations/schoolValidation.js';
 
 const router = express.Router();
 
@@ -15,12 +15,7 @@ router.post('/:id/import-students', authorize('school_admin', 'super_admin'), up
 router.post(
 	'/:id/invite-student',
 	authorize('school_admin', 'super_admin'),
-	[
-		body('name').trim().notEmpty().withMessage('Name is required'),
-		body('email').isEmail().normalizeEmail(),
-		body('promotion').optional().trim(),
-	],
-	validate,
+	validateBody(inviteStudentSchema),
 	inviteStudent
 );
 

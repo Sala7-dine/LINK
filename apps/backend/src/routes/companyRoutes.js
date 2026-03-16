@@ -1,5 +1,4 @@
 import express from 'express';
-import { body } from 'express-validator';
 
 import {
   getCompanies,
@@ -13,8 +12,9 @@ import {
 
 import {authenticate, authorize} from '../middleware/auth.js';
 import {tenantContext} from '../middleware/tenant.js';
-import { validate } from '../middleware/validate.js';
+import { validateBody } from '../middleware/yupValidate.js';
 import reviewRoutes from './reviewRoutes.js';
+import { inviteCompanyPartnerSchema } from '../validations/companyValidation.js';
 
 const router = express.Router();
 
@@ -22,11 +22,7 @@ router.post(
   '/invite',
   authenticate,
   authorize('super_admin'),
-  [
-    body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
-    body('companyName').optional().trim(),
-  ],
-  validate,
+  validateBody(inviteCompanyPartnerSchema),
   inviteCompanyPartner
 );
 

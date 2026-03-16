@@ -1,6 +1,5 @@
 import express from 'express';
 import passport from 'passport';
-import {body} from 'express-validator';
 
 import {
   register,
@@ -16,40 +15,34 @@ import {
 
 import {authenticate} from '../middleware/auth.js';
 import {authLimiter} from '../middleware/rateLimiter.js';
-import {validate} from '../middleware/validate.js';
+import {validateBody} from '../middleware/yupValidate.js';
+import {
+  registerSchoolSchema,
+  registerSchema,
+  loginSchema,
+  resetPasswordSchema,
+} from '../validations/authValidation.js';
 
 const router = express.Router();
 
 router.post(
   '/register-school',
   authLimiter,
-  [
-    body('schoolName').trim().notEmpty().withMessage('School name is required'),
-    body('adminName').trim().notEmpty().withMessage('Admin name is required'),
-    body('adminEmail').isEmail().normalizeEmail(),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-  ],
-  validate,
+  validateBody(registerSchoolSchema),
   registerSchool
 );
 
 router.post(
   '/register',
   authLimiter,
-  [
-    body('name').trim().notEmpty().withMessage('Name is required'),
-    body('email').isEmail().normalizeEmail(),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-  ],
-  validate,
+  validateBody(registerSchema),
   register
 );
 
 router.post(
   '/login',
   authLimiter,
-  [body('email').isEmail().normalizeEmail(), body('password').notEmpty()],
-  validate,
+  validateBody(loginSchema),
   login
 );
 
@@ -57,7 +50,7 @@ router.post('/refresh', refreshToken);
 router.post('/logout', authenticate, logout);
 router.get('/verify-email/:token', verifyEmail);
 router.post('/forgot-password', authLimiter, forgotPassword);
-router.patch('/reset-password/:token', [body('password').isLength({ min: 8 })], validate, resetPassword);
+router.patch('/reset-password/:token', validateBody(resetPasswordSchema), resetPassword);
 
 // OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));

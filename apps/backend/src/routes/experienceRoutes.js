@@ -1,12 +1,12 @@
 import express from 'express';
-import { body } from 'express-validator';
 import { authenticate, authorize } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
+import { validateBody } from '../middleware/yupValidate.js';
 import {
   getAllExperiences,
   getMyExperiences,
   createExperience,
 } from '../controllers/experienceController.js';
+import { createExperienceSchema } from '../validations/experienceValidation.js';
 
 const router = express.Router();
 
@@ -18,40 +18,7 @@ router.get('/me', getMyExperiences);
 router.post(
   '/',
   authorize('student'),
-  [
-    body('companyName').trim().notEmpty().withMessage('Company name is required'),
-    body('experienceType')
-      .isIn(['first_year_internship', 'second_year_internship', 'second_year_cdi'])
-      .withMessage('Invalid experience type'),
-    body('startDate').isISO8601().withMessage('Start date must be a valid date'),
-    body('endDate')
-      .isISO8601()
-      .withMessage('End date must be a valid date')
-      .custom((value, { req }) => {
-        const start = new Date(req.body.startDate);
-        const end = new Date(value);
-        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
-          throw new Error('End date must be after start date');
-        }
-        return true;
-      }),
-    body('location').trim().notEmpty().withMessage('Location is required'),
-    body('description')
-      .optional({ values: 'falsy' })
-      .isLength({ max: 1000 })
-      .withMessage('Description cannot exceed 1000 characters'),
-    body('technologies')
-      .optional({ values: 'falsy' })
-      .isArray()
-      .withMessage('Technologies must be an array'),
-    body('technologies.*')
-      .optional({ values: 'falsy' })
-      .isString()
-      .withMessage('Each technology must be a string'),
-    body('companyLinkedinUrl').optional({ values: 'falsy' }).isURL().withMessage('LinkedIn URL is invalid'),
-    body('companyWebsiteUrl').optional({ values: 'falsy' }).isURL().withMessage('Website URL is invalid'),
-  ],
-  validate,
+  validateBody(createExperienceSchema),
   createExperience
 );
 

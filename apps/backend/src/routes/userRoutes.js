@@ -1,5 +1,4 @@
 import express from 'express';
-import {body} from 'express-validator';
 
 import {
     getMe,
@@ -14,8 +13,9 @@ import {
 
 import {authenticate, authorize} from '../middleware/auth.js';
 import {tenantContext} from '../middleware/tenant.js';
-import {validate} from '../middleware/validate.js';
+import {validateBody} from '../middleware/yupValidate.js';
 import upload from '../middleware/upload.js';
+import {suspendUserSchema, updateUserRoleSchema} from '../validations/userValidation.js';
 
 const router = express.Router();
 
@@ -40,16 +40,14 @@ router.patch(
 	'/:id/suspend',
 	authorize('school_admin', 'super_admin'),
 	tenantForSchoolAdminOnly,
-	[body('isActive').optional().isBoolean()],
-	validate,
+	validateBody(suspendUserSchema),
 	suspendUser
 );
 router.patch(
 	'/:id/role',
 	authorize('school_admin', 'super_admin'),
 	tenantForSchoolAdminOnly,
-	[body('role').isIn(['student', 'school_admin', 'company_admin', 'super_admin'])],
-	validate,
+	validateBody(updateUserRoleSchema),
 	updateUserRole
 );
 

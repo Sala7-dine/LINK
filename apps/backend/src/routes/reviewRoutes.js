@@ -1,5 +1,4 @@
 import express from 'express';
-import {body} from 'express-validator';
 
 import {
   getReviews,
@@ -13,8 +12,9 @@ import {
 
 import {authenticate, authorize} from '../middleware/auth.js';
 import {tenantContext} from '../middleware/tenant.js';
-import {validate} from '../middleware/validate.js';
+import {validateBody} from '../middleware/yupValidate.js';
 import upload from '../middleware/upload.js';
+import {createReviewSchema} from '../validations/reviewValidation.js';
 
 const router = express.Router({ mergeParams: true });
 
@@ -25,11 +25,7 @@ router.get('/', getReviews);
 router.post(
   '/',
   upload.array('attachments', 3),
-  [
-    body('globalRating').isInt({ min: 1, max: 5 }),
-    body('content').isLength({ min: 50 }).withMessage('Review must be at least 50 characters'),
-  ],
-  validate,
+  validateBody(createReviewSchema),
   createReview
 );
 
