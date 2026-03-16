@@ -48,6 +48,8 @@ const createExperience = async (req, res, next) => {
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       location: req.body.location,
+      description: req.body.description,
+      technologies: req.body.technologies,
       companyLinkedinUrl: req.body.companyLinkedinUrl,
       companyWebsiteUrl: req.body.companyWebsiteUrl,
       author: req.user._id,

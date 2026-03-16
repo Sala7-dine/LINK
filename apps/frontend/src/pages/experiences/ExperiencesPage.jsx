@@ -58,6 +58,18 @@ export default function ExperiencesPage() {
               <p>{exp.location}</p>
             </div>
 
+            {exp.description && <p className="text-sm text-gray-600">{exp.description}</p>}
+
+            {Array.isArray(exp.technologies) && exp.technologies.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {exp.technologies.map((tech) => (
+                  <span key={tech} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2 text-sm">
               {exp.companyLinkedinUrl && (
                 <a

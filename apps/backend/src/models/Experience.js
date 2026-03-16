@@ -33,6 +33,12 @@ const experienceSchema = new mongoose.Schema(
       trim: true,
       maxlength: [120, 'Location cannot exceed 120 characters'],
     },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Description cannot exceed 1000 characters'],
+    },
+    technologies: [{ type: String, trim: true }],
     companyLinkedinUrl: {
       type: String,
       trim: true,
@@ -54,6 +60,6 @@ const experienceSchema = new mongoose.Schema(
 );
 
 experienceSchema.index({ createdAt: -1 });
-experienceSchema.index({ companyName: 'text', location: 'text' });
+experienceSchema.index({ companyName: 'text', location: 'text', description: 'text', technologies: 'text' });
 
 export default mongoose.model('Experience', experienceSchema);

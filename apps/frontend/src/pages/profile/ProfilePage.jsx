@@ -48,6 +48,8 @@ export default function ProfilePage() {
       startDate: '',
       endDate: '',
       location: '',
+      description: '',
+      technologies: '',
       companyLinkedinUrl: '',
       companyWebsiteUrl: '',
     },
@@ -84,7 +86,10 @@ export default function ProfilePage() {
   };
 
   const onSubmitExperience = (values) => {
-    createExperience(values);
+    const technologies = values.technologies
+      ? values.technologies.split(',').map((item) => item.trim()).filter(Boolean)
+      : [];
+    createExperience({ ...values, technologies });
   };
 
   const downloadPdf = async () => {
@@ -210,6 +215,25 @@ export default function ProfilePage() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  {...registerExperience('description')}
+                  className="input resize-none"
+                  rows={4}
+                  placeholder="Resume votre experience, vos missions et ce que vous avez appris..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Technologies (separees par des virgules)</label>
+                <input
+                  {...registerExperience('technologies')}
+                  className="input"
+                  placeholder="React, Node.js, Docker"
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn entreprise</label>
@@ -241,6 +265,16 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-600">{experience.location}</p>
+                {experience.description && <p className="text-sm text-gray-600">{experience.description}</p>}
+                {Array.isArray(experience.technologies) && experience.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {experience.technologies.map((tech) => (
+                      <span key={tech} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </article>
             ))}
           </div>

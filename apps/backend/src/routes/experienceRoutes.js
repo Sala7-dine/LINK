@@ -36,6 +36,18 @@ router.post(
         return true;
       }),
     body('location').trim().notEmpty().withMessage('Location is required'),
+    body('description')
+      .optional({ values: 'falsy' })
+      .isLength({ max: 1000 })
+      .withMessage('Description cannot exceed 1000 characters'),
+    body('technologies')
+      .optional({ values: 'falsy' })
+      .isArray()
+      .withMessage('Technologies must be an array'),
+    body('technologies.*')
+      .optional({ values: 'falsy' })
+      .isString()
+      .withMessage('Each technology must be a string'),
     body('companyLinkedinUrl').optional({ values: 'falsy' }).isURL().withMessage('LinkedIn URL is invalid'),
     body('companyWebsiteUrl').optional({ values: 'falsy' }).isURL().withMessage('Website URL is invalid'),
   ],
