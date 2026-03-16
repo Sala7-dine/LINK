@@ -1,8 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { dashboardService } from '../../services';
+import { companyService, dashboardService } from '../../services';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../store/slices/authSlice';
+import { toast } from 'react-toastify';
 
 const StatCard = ({ label, value, color = 'text-primary-600' }) => (
   <div className="card">
@@ -13,10 +15,42 @@ const StatCard = ({ label, value, color = 'text-primary-600' }) => (
 
 export default function DashboardPage() {
   const user = useSelector(selectUser);
+  const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => dashboardService.get().then((r) => r.data.data),
-    enabled: ['school_admin', 'super_admin'].includes(user?.role),
+    enabled: user?.role === 'school_admin',
+  });
+
+  const {
+    data: superData,
+    isLoading: isSuperLoading,
+    isError: isSuperError,
+  } = useQuery({
+    queryKey: ['dashboard-super-admin'],
+    queryFn: () => dashboardService.getSuperAdmin().then((r) => r.data.data),
+    enabled: user?.role === 'super_admin',
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm({
+    defaultValues: { email: '', companyName: '' },
+  });
+
+  const inviteMutation = useMutation({
+    mutationFn: (payload) => companyService.invitePartner(payload),
+    onSuccess: ({ data: response }) => {
+      toast.success(response?.message || 'Invitation partenaire creee');
+      reset();
+      queryClient.invalidateQueries({ queryKey: ['dashboard-super-admin'] });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Erreur lors de l\'invitation partenaire');
+    },
   });
 
   if (!['school_admin', 'super_admin'].includes(user?.role)) {
@@ -27,6 +61,58 @@ export default function DashboardPage() {
           <p className="text-gray-600 dark:text-gray-400">
             Bienvenue, <strong>{user?.name}</strong> ! Explorez les entreprises et trouvez votre stage idéal.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.role === 'super_admin') {
+    if (isSuperLoading) return <div className="text-center py-20 text-gray-400">Chargement...</div>;
+    if (isSuperError) return <div className="text-center py-20 text-red-400">Erreur lors du chargement des données.</div>;
+
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Dashboard Super Admin</h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard label="Ecoles actives" value={superData?.totalSchools ?? '—'} />
+          <StatCard label="Utilisateurs actifs" value={superData?.totalUsers ?? '—'} />
+          <StatCard label="Avis approuves" value={superData?.totalReviews ?? '—'} />
+          <StatCard label="Entreprises approuvees" value={superData?.totalCompanies ?? '—'} />
+        </div>
+
+        <div className="card max-w-2xl">
+          <h2 className="font-semibold mb-4">Inviter un partenaire entreprise</h2>
+          <form
+            className="space-y-4"
+            onSubmit={handleSubmit((values) => inviteMutation.mutate(values))}
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email partenaire</label>
+              <input
+                {...register('email', { required: true })}
+                type="email"
+                className="input"
+                placeholder="partner@company.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom entreprise (optionnel)</label>
+              <input
+                {...register('companyName')}
+                type="text"
+                className="input"
+                placeholder="Acme Corp"
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={isSubmitting || inviteMutation.isPending}
+            >
+              {isSubmitting || inviteMutation.isPending ? 'Invitation...' : 'Envoyer invitation'}
+            </button>
+          </form>
         </div>
       </div>
     );

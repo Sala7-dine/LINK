@@ -14,6 +14,7 @@ export const companyService = {
   getOne: (id) => api.get(`/companies/${id}`),
   create: (data) => api.post('/companies', data),
   moderate: (id, status) => api.patch(`/companies/${id}/moderate`, { status }),
+  invitePartner: (data) => api.post('/companies/invite', data),
 };
 
 export const reviewService = {

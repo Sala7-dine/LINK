@@ -2,6 +2,7 @@ import Company from '../models/Company.js';
 import User from '../models/User.js';
 import CompanyInvitation from '../models/CompanyInvitation.js';
 import crypto from 'crypto';
+import { sendPasswordResetEmail } from '../services/emailService.js';
 
 // GET /api/v1/companies
 const getCompanies = async (req, res, next) => {
@@ -116,6 +117,7 @@ const inviteCompanyPartner = async (req, res, next) => {
     }
 
     const invitationToken = crypto.randomBytes(32).toString('hex');
+    const passwordResetToken = crypto.randomBytes(32).toString('hex');
 
     const invitation = await CompanyInvitation.create({
       email,
@@ -125,9 +127,32 @@ const inviteCompanyPartner = async (req, res, next) => {
       invitedBy: req.user._id,
     });
 
+    const companyAdminUser = await User.create({
+      name: companyName || 'Company Admin',
+      email,
+      password: Math.random().toString(36).slice(-12),
+      role: 'company_admin',
+      isVerified: true,
+    });
+
+    companyAdminUser.passwordResetToken = passwordResetToken;
+    companyAdminUser.passwordResetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+    await companyAdminUser.save({ validateBeforeSave: false });
+
+    try {
+      await sendPasswordResetEmail(email, passwordResetToken);
+    } catch (emailErr) {
+      await CompanyInvitation.findByIdAndDelete(invitation._id);
+      await User.findByIdAndDelete(companyAdminUser._id);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Invitation created but email could not be sent. Please check SMTP configuration.',
+      });
+    }
+
     res.status(201).json({
       status: 'success',
-      message: 'Partner invitation created successfully',
+      message: 'Partner invitation created and email sent successfully',
       data: {
         invitation: {
           id: invitation._id,
@@ -137,8 +162,8 @@ const inviteCompanyPartner = async (req, res, next) => {
           status: invitation.status,
           expiresAt: invitation.expiresAt,
           invitedBy: invitation.invitedBy,
-          invitationToken,
         },
+        user: { id: companyAdminUser._id, email: companyAdminUser.email, role: companyAdminUser.role },
       },
     });
   } catch (err) {
