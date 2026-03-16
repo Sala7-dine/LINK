@@ -16,6 +16,7 @@ import reviewRoutes from './routes/reviewRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
+import experienceRoutes from './routes/experienceRoutes.js';
 
 import './config/passport.js';
 
@@ -56,6 +57,7 @@ app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/offers', offerRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/schools', schoolRoutes);
+app.use('/api/v1/experiences', experienceRoutes);
 
 // ── Health check ─────────────────────────────────────
 app.get('/api/health', (req, res) => {

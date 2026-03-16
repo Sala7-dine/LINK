@@ -1,15 +1,28 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { selectUser, setUser } from '../../store/slices/authSlice';
-import { userService } from '../../services';
+import { experienceService, userService } from '../../services';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+
+const EXPERIENCE_TYPES = [
+  { value: 'first_year_internship', label: 'Stage 1ere annee' },
+  { value: 'second_year_internship', label: 'Stage 2eme annee' },
+  { value: 'second_year_cdi', label: 'CDI 2eme annee' },
+];
+
+const formatDate = (value) => {
+  if (!value) return '—';
+  return new Date(value).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+};
 
 export default function ProfilePage() {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const [showExperienceForm, setShowExperienceForm] = useState(false);
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues: {
@@ -23,6 +36,28 @@ export default function ProfilePage() {
     },
   });
 
+  const {
+    register: registerExperience,
+    handleSubmit: handleExperienceSubmit,
+    reset: resetExperienceForm,
+    formState: { isSubmitting: isCreatingExperience },
+  } = useForm({
+    defaultValues: {
+      companyName: '',
+      experienceType: 'first_year_internship',
+      startDate: '',
+      endDate: '',
+      location: '',
+      companyLinkedinUrl: '',
+      companyWebsiteUrl: '',
+    },
+  });
+
+  const { data: myExperiences } = useQuery({
+    queryKey: ['my-experiences'],
+    queryFn: () => experienceService.getMine().then((r) => r.data.data.experiences),
+  });
+
   const { mutate: save } = useMutation({
     mutationFn: (data) => userService.updateMe(data),
     onSuccess: ({ data }) => {
@@ -32,8 +67,24 @@ export default function ProfilePage() {
     onError: () => toast.error('Erreur lors de la mise à jour'),
   });
 
+  const { mutate: createExperience } = useMutation({
+    mutationFn: (payload) => experienceService.create(payload),
+    onSuccess: () => {
+      toast.success('Experience ajoutee avec succes !');
+      resetExperienceForm();
+      setShowExperienceForm(false);
+      queryClient.invalidateQueries({ queryKey: ['my-experiences'] });
+      queryClient.invalidateQueries({ queryKey: ['experiences'] });
+    },
+    onError: () => toast.error("Impossible d'ajouter l'experience"),
+  });
+
   const onSubmit = (values) => {
     save({ ...values, skills: values.skills.split(',').map((s) => s.trim()).filter(Boolean) });
+  };
+
+  const onSubmitExperience = (values) => {
+    createExperience(values);
   };
 
   const downloadPdf = async () => {
@@ -109,6 +160,92 @@ export default function ProfilePage() {
           {isSubmitting ? 'Enregistrement...' : 'Sauvegarder'}
         </button>
       </form>
+
+      {user?.role === 'student' && (
+        <section className="space-y-4">
+          <div className="card flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold">Mes experiences</h2>
+              <p className="text-sm text-gray-500">Partagez vos experiences pour aider les autres etudiants.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowExperienceForm((prev) => !prev)}
+              className="btn-primary"
+            >
+              {showExperienceForm ? 'Annuler' : 'Ajouter une experience'}
+            </button>
+          </div>
+
+          {showExperienceForm && (
+            <form onSubmit={handleExperienceSubmit(onSubmitExperience)} className="card space-y-4">
+              <h3 className="font-semibold">Nouvelle experience</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Entreprise</label>
+                  <input {...registerExperience('companyName', { required: true })} className="input" placeholder="Ex: Capgemini" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <select {...registerExperience('experienceType', { required: true })} className="input">
+                    {EXPERIENCE_TYPES.map((type) => (
+                      <option key={type.value} value={type.value}>{type.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date debut</label>
+                  <input type="date" {...registerExperience('startDate', { required: true })} className="input" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date fin</label>
+                  <input type="date" {...registerExperience('endDate', { required: true })} className="input" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Localisation</label>
+                  <input {...registerExperience('location', { required: true })} className="input" placeholder="Casablanca" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn entreprise</label>
+                  <input {...registerExperience('companyLinkedinUrl')} className="input" placeholder="https://linkedin.com/company/..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Site web entreprise</label>
+                  <input {...registerExperience('companyWebsiteUrl')} className="input" placeholder="https://..." />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-primary" disabled={isCreatingExperience}>
+                {isCreatingExperience ? 'Publication...' : 'Publier'}
+              </button>
+            </form>
+          )}
+
+          <div className="space-y-3">
+            {(myExperiences || []).length === 0 && (
+              <div className="card text-sm text-gray-500">Aucune experience partagee pour le moment.</div>
+            )}
+
+            {(myExperiences || []).map((experience) => (
+              <article key={experience._id} className="card space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-semibold">{experience.companyName}</h3>
+                  <span className="text-xs text-gray-500">
+                    {formatDate(experience.startDate)} - {formatDate(experience.endDate)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">{experience.location}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

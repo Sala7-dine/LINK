@@ -16,6 +16,7 @@ const baseNav = [
   { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
   { to: '/companies', label: 'Entreprises', icon: BuildingOffice2Icon },
   { to: '/offers', label: 'Offres', icon: BriefcaseIcon },
+  { to: '/experiences', label: 'Experiences', icon: BriefcaseIcon },
   { to: '/kanban', label: 'Mes candidatures', icon: ViewColumnsIcon },
   { to: '/profile', label: 'Mon profil', icon: UserCircleIcon },
 ];

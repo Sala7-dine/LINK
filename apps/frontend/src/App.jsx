@@ -16,6 +16,7 @@ import OffersPage from './pages/offers/OffersPage';
 import OfferDetailPage from './pages/offers/OfferDetailPage';
 import KanbanPage from './pages/offers/KanbanPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import ExperiencesPage from './pages/experiences/ExperiencesPage';
 import ImportStudentsPage from './pages/schools/ImportStudentsPage';
 import UsersManagementPage from './pages/users/UsersManagementPage';
 import CompanyApplicationsPage from './pages/company/CompanyApplicationsPage';
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="/offers/:id" element={<OfferDetailPage />} />
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/experiences" element={<ExperiencesPage />} />
           <Route path="/admin/import-students" element={<ProtectedRoute roles={['school_admin', 'super_admin']}><ImportStudentsPage /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute roles={['school_admin', 'super_admin']}><UsersManagementPage /></ProtectedRoute>} />
           <Route path="/company/applications" element={<ProtectedRoute roles={['company_admin', 'super_admin']}><CompanyApplicationsPage /></ProtectedRoute>} />

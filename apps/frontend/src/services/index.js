@@ -25,6 +25,12 @@ export const reviewService = {
   moderate: (id, status) => api.patch(`/reviews/${id}/moderate`, { status }),
 };
 
+export const experienceService = {
+  getAll: (params) => api.get('/experiences', { params }),
+  getMine: () => api.get('/experiences/me'),
+  create: (data) => api.post('/experiences', data),
+};
+
 export const offerService = {
   getAll: (params) => api.get('/offers', { params }),
   getOne: (id) => api.get(`/offers/${id}`),
