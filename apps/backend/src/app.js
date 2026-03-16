@@ -51,6 +51,7 @@ app.use('/api', apiLimiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
+app.use('/api/v1/company', companyRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/offers', offerRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);

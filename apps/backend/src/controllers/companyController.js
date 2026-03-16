@@ -1,4 +1,7 @@
 import Company from '../models/Company.js';
+import User from '../models/User.js';
+import CompanyInvitation from '../models/CompanyInvitation.js';
+import crypto from 'crypto';
 
 // GET /api/v1/companies
 const getCompanies = async (req, res, next) => {
@@ -92,4 +95,55 @@ const moderateCompany = async (req, res, next) => {
   }
 };
 
-export { getCompanies, getCompany, createCompany, updateCompany, deleteCompany, moderateCompany };
+// POST /api/v1/companies/invite (super_admin)
+const inviteCompanyPartner = async (req, res, next) => {
+  try {
+    const { email, companyName } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ status: 'fail', message: 'A user already exists with this email' });
+    }
+
+    const existingPending = await CompanyInvitation.findOne({
+      email,
+      status: 'pending',
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (existingPending) {
+      return res.status(409).json({ status: 'fail', message: 'A pending invitation already exists for this email' });
+    }
+
+    const invitationToken = crypto.randomBytes(32).toString('hex');
+
+    const invitation = await CompanyInvitation.create({
+      email,
+      companyName,
+      invitationToken,
+      role: 'company_admin',
+      invitedBy: req.user._id,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Partner invitation created successfully',
+      data: {
+        invitation: {
+          id: invitation._id,
+          email: invitation.email,
+          companyName: invitation.companyName,
+          role: invitation.role,
+          status: invitation.status,
+          expiresAt: invitation.expiresAt,
+          invitedBy: invitation.invitedBy,
+          invitationToken,
+        },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getCompanies, getCompany, createCompany, updateCompany, deleteCompany, moderateCompany, inviteCompanyPartner };

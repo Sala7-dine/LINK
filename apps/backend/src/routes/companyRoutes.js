@@ -1,4 +1,5 @@
 import express from 'express';
+import { body } from 'express-validator';
 
 import {
   getCompanies,
@@ -7,13 +8,27 @@ import {
   updateCompany,
   deleteCompany,
   moderateCompany,
+  inviteCompanyPartner,
 } from '../controllers/companyController.js';
 
 import {authenticate, authorize} from '../middleware/auth.js';
 import {tenantContext} from '../middleware/tenant.js';
+import { validate } from '../middleware/validate.js';
 import reviewRoutes from './reviewRoutes.js';
 
 const router = express.Router();
+
+router.post(
+  '/invite',
+  authenticate,
+  authorize('super_admin'),
+  [
+    body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+    body('companyName').optional().trim(),
+  ],
+  validate,
+  inviteCompanyPartner
+);
 
 router.use(authenticate, tenantContext);
 

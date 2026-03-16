@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import { generateCandidateProfile } from '../services/pdfService.js';
 
 const getRoleFilterForEditor = (editorRole) => {
-  if (editorRole === 'super_admin') return ['student', 'school_admin', 'super_admin'];
+  if (editorRole === 'super_admin') return ['student', 'school_admin', 'company_admin', 'super_admin'];
   return ['student', 'school_admin'];
 };
 

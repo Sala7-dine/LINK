@@ -48,7 +48,7 @@ router.patch(
 	'/:id/role',
 	authorize('school_admin', 'super_admin'),
 	tenantForSchoolAdminOnly,
-	[body('role').isIn(['student', 'school_admin', 'super_admin'])],
+	[body('role').isIn(['student', 'school_admin', 'company_admin', 'super_admin'])],
 	validate,
 	updateUserRole
 );
