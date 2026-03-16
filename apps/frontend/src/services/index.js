@@ -29,8 +29,11 @@ export const offerService = {
   getAll: (params) => api.get('/offers', { params }),
   getOne: (id) => api.get(`/offers/${id}`),
   getMyApplications: () => api.get('/offers/applications/me'),
+  getCompanyApplicants: (params) => api.get('/offers/company/applicants', { params }),
+  updateCompanyApplicationStatus: (id, data) => api.patch(`/offers/company/applications/${id}/status`, data),
   apply: (id, data) => api.post(`/offers/${id}/apply`, data),
   updateApplication: (id, data) => api.patch(`/offers/applications/${id}`, data),
+  create: (data) => api.post('/offers', data),
 };
 
 export const dashboardService = {

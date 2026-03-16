@@ -41,10 +41,14 @@ const offerSchema = new mongoose.Schema(
     externalUrl: { type: String },
 
     school: { type: mongoose.Schema.Types.ObjectId, ref: 'School' },
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
     tenantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
-      required: true,
       index: true,
     },
     isActive: { type: Boolean, default: true },

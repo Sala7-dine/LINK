@@ -24,12 +24,18 @@ export default function Sidebar() {
   const open = useSelector(selectSidebarOpen);
   const user = useSelector(selectUser);
   const isSchoolAdmin = ['school_admin', 'super_admin'].includes(user?.role);
+  const isCompanyAdmin = user?.role === 'company_admin';
   const nav = isSchoolAdmin
     ? [
       ...baseNav,
       { to: '/admin/import-students', label: 'Import etudiants', icon: ArrowUpTrayIcon },
       { to: '/admin/users', label: 'Gestion users', icon: UsersIcon },
     ]
+    : isCompanyAdmin
+      ? [
+        ...baseNav,
+        { to: '/company/applications', label: 'Candidatures recues', icon: UsersIcon },
+      ]
     : baseNav;
 
   return (

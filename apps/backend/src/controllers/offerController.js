@@ -2,11 +2,17 @@ import Offer from '../models/Offer.js';
 import Application from '../models/Application.js';
 import { fetchAndStore } from '../services/aggregatorService.js';
 
+const getOfferScope = (req) => {
+  if (req.user.role === 'company_admin') return { postedBy: req.user._id };
+  if (req.tenantId) return { tenantId: req.tenantId };
+  return {};
+};
+
 // GET /api/v1/offers
 const getOffers = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, search, location, remote, tech, contractType, source } = req.query;
-    const query = { isActive: true, tenantId: req.tenantId };
+    const query = { isActive: true, ...getOfferScope(req) };
     if (location) query.location = new RegExp(location, 'i');
     if (remote === 'true') query.isRemote = true;
     if (tech) query.technologies = new RegExp(tech, 'i');
@@ -29,7 +35,7 @@ const getOffers = async (req, res, next) => {
 // GET /api/v1/offers/:id
 const getOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findOne({ _id: req.params.id, tenantId: req.tenantId }).populate('company', 'name logo city averageRating');
+    const offer = await Offer.findOne({ _id: req.params.id, ...getOfferScope(req) }).populate('company', 'name logo city averageRating');
     if (!offer) return res.status(404).json({ status: 'fail', message: 'Offer not found' });
     res.status(200).json({ status: 'success', data: { offer } });
   } catch (err) {
@@ -40,7 +46,26 @@ const getOffer = async (req, res, next) => {
 // POST /api/v1/offers (admin)
 const createOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.create({ ...req.body, school: req.tenantId, tenantId: req.tenantId });
+    let payload;
+    if (req.user.role === 'company_admin') {
+      if (!req.body.companyName) {
+        return res.status(400).json({ status: 'fail', message: 'companyName is required for company admin offers' });
+      }
+      payload = {
+        ...req.body,
+        postedBy: req.user._id,
+        source: 'manual',
+      };
+    } else {
+      payload = {
+        ...req.body,
+        school: req.tenantId,
+        tenantId: req.tenantId,
+        postedBy: req.user._id,
+      };
+    }
+
+    const offer = await Offer.create(payload);
     res.status(201).json({ status: 'success', data: { offer } });
   } catch (err) {
     next(err);
@@ -50,7 +75,7 @@ const createOffer = async (req, res, next) => {
 // DELETE /api/v1/offers/:id (admin)
 const deleteOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    const offer = await Offer.findOneAndDelete({ _id: req.params.id, ...getOfferScope(req) });
     if (!offer) return res.status(404).json({ status: 'fail', message: 'Offer not found' });
     res.status(204).json({ status: 'success', data: null });
   } catch (err) {
@@ -74,6 +99,9 @@ const syncExternalOffers = async (req, res, next) => {
 // GET /api/v1/offers/applications/me
 const getMyApplications = async (req, res, next) => {
   try {
+    if (!req.tenantId) {
+      return res.status(403).json({ status: 'fail', message: 'Tenant context is required for student applications' });
+    }
     const applications = await Application.find({ student: req.user._id, tenantId: req.tenantId })
       .populate('offer', 'title companyName location contractType technologies')
       .sort('-updatedAt');
@@ -86,6 +114,10 @@ const getMyApplications = async (req, res, next) => {
 // POST /api/v1/offers/:id/apply
 const applyToOffer = async (req, res, next) => {
   try {
+    if (!req.tenantId) {
+      return res.status(403).json({ status: 'fail', message: 'Tenant context is required for applications' });
+    }
+
     const application = await Application.create({
       student: req.user._id,
       offer: req.params.id,
@@ -101,6 +133,10 @@ const applyToOffer = async (req, res, next) => {
 // PATCH /api/v1/offers/applications/:id
 const updateApplicationStatus = async (req, res, next) => {
   try {
+    if (!req.tenantId) {
+      return res.status(403).json({ status: 'fail', message: 'Tenant context is required for applications' });
+    }
+
     const application = await Application.findOneAndUpdate(
       { _id: req.params.id, student: req.user._id, tenantId: req.tenantId },
       { status: req.body.status, notes: req.body.notes },
@@ -113,7 +149,89 @@ const updateApplicationStatus = async (req, res, next) => {
   }
 };
 
+// GET /api/v1/offers/company/applicants (company_admin)
+const getCompanyApplicants = async (req, res, next) => {
+  try {
+    const { status, search, sortBy = 'recent' } = req.query;
+    const offerFilter = req.user.role === 'company_admin'
+      ? { postedBy: req.user._id }
+      : {};
+
+    const offers = await Offer.find(offerFilter).select('_id title companyName');
+    const offerIds = offers.map((o) => o._id);
+
+    if (offerIds.length === 0) {
+      return res.status(200).json({ status: 'success', data: { applications: [] } });
+    }
+
+    const appQuery = { offer: { $in: offerIds } };
+    if (status) appQuery.status = status;
+
+    let sort = { createdAt: -1 };
+    if (sortBy === 'oldest') sort = { createdAt: 1 };
+    if (sortBy === 'status') sort = { status: 1, createdAt: -1 };
+
+    const applications = await Application.find(appQuery)
+      .populate('offer', 'title companyName location contractType')
+      .populate('student', 'name email avatar promotion bio skills githubUrl linkedinUrl portfolio projects')
+      .sort(sort);
+
+    const normalizedSearch = search?.trim().toLowerCase();
+    const filteredApplications = normalizedSearch
+      ? applications.filter((app) => {
+          const candidateName = app.student?.name?.toLowerCase() || '';
+          const candidateEmail = app.student?.email?.toLowerCase() || '';
+          const offerTitle = app.offer?.title?.toLowerCase() || '';
+          return candidateName.includes(normalizedSearch)
+            || candidateEmail.includes(normalizedSearch)
+            || offerTitle.includes(normalizedSearch);
+        })
+      : applications;
+
+    res.status(200).json({ status: 'success', data: { applications: filteredApplications } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PATCH /api/v1/offers/company/applications/:id/status (company_admin)
+const updateCompanyApplicationStatus = async (req, res, next) => {
+  try {
+    const { status, notes } = req.body;
+    const allowedStatuses = ['interview', 'accepted', 'rejected'];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: `Status must be one of: ${allowedStatuses.join(', ')}`,
+      });
+    }
+
+    const application = await Application.findById(req.params.id).populate('offer', 'postedBy title companyName');
+    if (!application) {
+      return res.status(404).json({ status: 'fail', message: 'Application not found' });
+    }
+
+    if (
+      req.user.role === 'company_admin'
+      && String(application.offer?.postedBy) !== String(req.user._id)
+    ) {
+      return res.status(403).json({ status: 'fail', message: 'You can only update applications for your own offers' });
+    }
+
+    application.status = status;
+    if (typeof notes === 'string') application.notes = notes;
+    await application.save();
+
+    await application.populate('student', 'name email avatar promotion bio skills githubUrl linkedinUrl portfolio projects');
+
+    res.status(200).json({ status: 'success', data: { application } });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   getOffers, getOffer, createOffer, deleteOffer, syncExternalOffers,
-  getMyApplications, applyToOffer, updateApplicationStatus,
+  getMyApplications, applyToOffer, updateApplicationStatus, getCompanyApplicants, updateCompanyApplicationStatus,
 };

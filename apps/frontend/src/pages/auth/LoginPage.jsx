@@ -15,6 +15,7 @@ const schema = z.object({
 const getDashboardPathByRole = (role) => {
   if (role === 'school_admin') return '/admin/dashboard';
   if (role === 'super_admin') return '/platform/dashboard';
+  if (role === 'company_admin') return '/company/applications';
   return '/student/dashboard';
 };
 
