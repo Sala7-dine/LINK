@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { selectUser, setUser } from '../../store/slices/authSlice';
 import { experienceService, userService } from '../../services';
-import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { DocumentArrowDownIcon, PencilSquareIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const EXPERIENCE_TYPES = [
-  { value: 'first_year_internship', label: 'Stage 1ere annee' },
-  { value: 'second_year_internship', label: 'Stage 2eme annee' },
-  { value: 'second_year_cdi', label: 'CDI 2eme annee' },
+  { value: 'first_year_internship', label: 'Stage 1ère année' },
+  { value: 'second_year_internship', label: 'Stage 2ème année' },
+  { value: 'second_year_cdi', label: 'CDI 2ème année' },
 ];
 
 const formatDate = (value) => {
@@ -18,11 +18,33 @@ const formatDate = (value) => {
   return new Date(value).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
 };
 
+function useRevealOnScroll() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    const els = document.querySelectorAll('.reveal-on-scroll');
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
+
 export default function ProfilePage() {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [showExperienceForm, setShowExperienceForm] = useState(false);
+  useRevealOnScroll();
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues: {
@@ -64,7 +86,7 @@ export default function ProfilePage() {
     mutationFn: (data) => userService.updateMe(data),
     onSuccess: ({ data }) => {
       dispatch(setUser(data.data.user));
-      toast.success('Profil mis à jour !');
+      toast.success('Profil mis à jour avec succès !');
     },
     onError: () => toast.error('Erreur lors de la mise à jour'),
   });
@@ -72,13 +94,13 @@ export default function ProfilePage() {
   const { mutate: createExperience } = useMutation({
     mutationFn: (payload) => experienceService.create(payload),
     onSuccess: () => {
-      toast.success('Experience ajoutee avec succes !');
+      toast.success('Expérience ajoutée avec succès !');
       resetExperienceForm();
       setShowExperienceForm(false);
       queryClient.invalidateQueries({ queryKey: ['my-experiences'] });
       queryClient.invalidateQueries({ queryKey: ['experiences'] });
     },
-    onError: () => toast.error("Impossible d'ajouter l'experience"),
+    onError: () => toast.error("Impossible d'ajouter l'expérience"),
   });
 
   const onSubmit = (values) => {
@@ -106,93 +128,139 @@ export default function ProfilePage() {
     }
   };
 
+  // Base input class for the forms
+  const inputClassName = "w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all shadow-sm placeholder:text-zinc-400 font-medium text-zinc-900";
+  const labelClassName = "block text-sm font-bold text-zinc-700 mb-1.5";
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Mon profil</h1>
-        <button onClick={downloadPdf} className="btn-secondary text-sm flex items-center gap-2">
-          <DocumentArrowDownIcon className="w-4 h-4" />
-          Télécharger PDF
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up pb-12">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Mon profil</h1>
+          <p className="text-lg text-zinc-500">Gérez vos informations personnelles et votre parcours de stage.</p>
+        </div>
+        <button 
+          onClick={downloadPdf} 
+          className="flex items-center justify-center gap-2 bg-white border border-zinc-200 text-zinc-700 font-semibold py-2.5 px-6 rounded-xl hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm"
+        >
+          <DocumentArrowDownIcon className="w-5 h-5" />
+          <span>Exporter (CV PDF)</span>
         </button>
       </div>
 
-      <div className="card flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-primary-500 flex items-center justify-center text-white text-2xl font-bold overflow-hidden flex-shrink-0">
+      {/* User Identity Card */}
+      <div className="bg-white p-8 rounded-[24px] border border-zinc-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] reveal-on-scroll flex flex-col sm:flex-row items-center sm:items-start gap-6 relative overflow-hidden">
+        {/* Background Blob decoration */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-100/50 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="w-24 h-24 rounded-bl-[24px] rounded-[10px] sm:rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-4xl font-bold overflow-hidden flex-shrink-0 shadow-lg shadow-green-500/30 z-10">
           {user?.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" /> : user?.name?.[0]?.toUpperCase()}
         </div>
-        <div>
-          <p className="font-semibold text-lg">{user?.name}</p>
-          <p className="text-sm text-gray-500">{user?.email}</p>
-          <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block capitalize ${user?.role === 'school_admin' ? 'bg-orange-100 text-orange-600' : 'bg-primary-50 text-primary-600'}`}>{user?.role}</span>
+        
+        <div className="text-center sm:text-left z-10 mt-2">
+          <h2 className="text-2xl font-bold text-zinc-900 mb-1">{user?.name}</h2>
+          <p className="text-zinc-500 font-medium mb-3">{user?.email}</p>
+          <div className="inline-flex">
+            <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize tracking-wide ${user?.role === 'school_admin' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+              Rôle : {user?.role}
+            </span>
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="card space-y-4">
-        <h2 className="font-semibold">Informations personnelles</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Personal Information Form */}
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 sm:p-10 rounded-[24px] border border-zinc-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] reveal-on-scroll space-y-6">
+        <div className="flex items-center gap-3 mb-6 border-b border-zinc-100 pb-4">
+          <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
+            <PencilSquareIcon className="w-5 h-5 text-zinc-600" />
+          </div>
+          <h2 className="text-xl font-bold text-zinc-900">Informations publiques</h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom</label>
-            <input {...register('name')} className="input" />
+            <label className={labelClassName}>Nom complet</label>
+            <input {...register('name')} className={inputClassName} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Promotion</label>
-            <input {...register('promotion')} className="input" placeholder="Ex: YouCode 2025" />
+            <label className={labelClassName}>Promotion</label>
+            <input {...register('promotion')} className={inputClassName} placeholder="Ex: YouCode 2025" />
           </div>
         </div>
+        
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label>
-          <textarea {...register('bio')} className="input resize-none" rows={3} placeholder="Décrivez-vous en quelques mots..." />
+          <label className={labelClassName}>Bio</label>
+          <textarea {...register('bio')} className={`${inputClassName} resize-none`} rows={4} placeholder="Décrivez-vous en quelques mots..." />
         </div>
+        
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compétences (séparées par des virgules)</label>
-          <input {...register('skills')} className="input" placeholder="React, Node.js, MongoDB, Docker..." />
+          <label className={labelClassName}>Compétences clés</label>
+          <input {...register('skills')} className={inputClassName} placeholder="Ex: React, Node.js, MongoDB, Docker... (séparer par des virgules)" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">GitHub</label>
-            <input {...register('githubUrl')} className="input" placeholder="https://github.com/..." />
+            <label className={labelClassName}>GitHub (URL)</label>
+            <input {...register('githubUrl')} className={inputClassName} placeholder="https://github.com/..." />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">LinkedIn</label>
-            <input {...register('linkedinUrl')} className="input" placeholder="https://linkedin.com/in/..." />
+            <label className={labelClassName}>LinkedIn (URL)</label>
+            <input {...register('linkedinUrl')} className={inputClassName} placeholder="https://linkedin.com/in/..." />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Portfolio</label>
-            <input {...register('portfolio')} className="input" placeholder="https://..." />
+            <label className={labelClassName}>Portfolio Web</label>
+            <input {...register('portfolio')} className={inputClassName} placeholder="https://..." />
           </div>
         </div>
-        <button type="submit" disabled={isSubmitting} className="btn-primary">
-          {isSubmitting ? 'Enregistrement...' : 'Sauvegarder'}
-        </button>
+        
+        <div className="pt-6 border-t border-zinc-100 flex justify-end">
+          <button 
+            type="submit" 
+            disabled={isSubmitting} 
+            className="group relative bg-zinc-900 text-white font-semibold py-3 px-8 rounded-xl overflow-hidden shadow-lg shadow-zinc-900/20 active:scale-95 transition-all w-full sm:w-auto"
+          >
+            <span className="relative z-10 transition-colors uppercase tracking-wider text-xs">{isSubmitting ? 'Enregistrement...' : 'Mettre à jour le profil'}</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </button>
+        </div>
       </form>
 
+      {/* Experience Section (Students Only) */}
       {user?.role === 'student' && (
-        <section className="space-y-4">
-          <div className="card flex items-center justify-between gap-3">
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-12 mb-6">
             <div>
-              <h2 className="font-semibold">Mes experiences</h2>
-              <p className="text-sm text-gray-500">Partagez vos experiences pour aider les autres etudiants.</p>
+              <h2 className="text-2xl font-bold text-zinc-900">Mon parcours</h2>
+              <p className="text-zinc-500 mt-1">Gérez vos stages et emplois et partagez-les avec le réseau.</p>
             </div>
             <button
               type="button"
               onClick={() => setShowExperienceForm((prev) => !prev)}
-              className="btn-primary"
+              className="flex items-center justify-center gap-2 bg-green-50 text-green-700 font-bold py-3 px-6 rounded-xl hover:bg-green-100 border border-green-200 transition-all shadow-sm w-full sm:w-auto"
             >
-              {showExperienceForm ? 'Annuler' : 'Ajouter une experience'}
+              <PlusIcon className={`w-5 h-5 transition-transform duration-300 ${showExperienceForm ? 'rotate-45' : ''}`} />
+              {showExperienceForm ? 'Fermer le formulaire' : 'Ajouter une expérience'}
             </button>
           </div>
 
+          {/* New Experience Form */}
           {showExperienceForm && (
-            <form onSubmit={handleExperienceSubmit(onSubmitExperience)} className="card space-y-4">
-              <h3 className="font-semibold">Nouvelle experience</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleExperienceSubmit(onSubmitExperience)} className="bg-white p-6 sm:p-10 rounded-[24px] border border-green-200 shadow-[0_10px_30px_-5px_rgba(34,197,94,0.15)] ring-4 ring-green-50/50 reveal-on-scroll space-y-6 mb-8 relative">
+              <div className="absolute top-0 right-0 p-6">
+                <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Nouveau</span>
+              </div>
+              
+              <h3 className="text-xl font-bold text-zinc-900 mb-6">Détails de l'expérience</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Entreprise</label>
-                  <input {...registerExperience('companyName', { required: true })} className="input" placeholder="Ex: Capgemini" />
+                  <label className={labelClassName}>Nom de l'entreprise</label>
+                  <input {...registerExperience('companyName', { required: true })} className={inputClassName} placeholder="Ex: Capgemini, Orange..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select {...registerExperience('experienceType', { required: true })} className="input">
+                  <label className={labelClassName}>Type de contrat</label>
+                  <select {...registerExperience('experienceType', { required: true })} className={inputClassName}>
                     {EXPERIENCE_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>{type.label}</option>
                     ))}
@@ -200,76 +268,98 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date debut</label>
-                  <input type="date" {...registerExperience('startDate', { required: true })} className="input" />
+                  <label className={labelClassName}>Date de début</label>
+                  <input type="date" {...registerExperience('startDate', { required: true })} className={inputClassName} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date fin</label>
-                  <input type="date" {...registerExperience('endDate', { required: true })} className="input" />
+                  <label className={labelClassName}>Date de fin</label>
+                  <input type="date" {...registerExperience('endDate', { required: true })} className={inputClassName} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Localisation</label>
-                  <input {...registerExperience('location', { required: true })} className="input" placeholder="Casablanca" />
+                  <label className={labelClassName}>Lieu (Ville / Remote)</label>
+                  <input {...registerExperience('location', { required: true })} className={inputClassName} placeholder="Ex: Casablanca" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className={labelClassName}>Description détaillée</label>
                 <textarea
                   {...registerExperience('description')}
-                  className="input resize-none"
+                  className={`${inputClassName} resize-none`}
                   rows={4}
-                  placeholder="Resume votre experience, vos missions et ce que vous avez appris..."
+                  placeholder="Décrivez les missions réalisées, le contexte du projet, et les compétences acquises..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Technologies (separees par des virgules)</label>
+                <label className={labelClassName}>Technologies utilisées</label>
                 <input
                   {...registerExperience('technologies')}
-                  className="input"
-                  placeholder="React, Node.js, Docker"
+                  className={inputClassName}
+                  placeholder="Ex: React, Node.js, Docker (séparées par des virgules)"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn entreprise</label>
-                  <input {...registerExperience('companyLinkedinUrl')} className="input" placeholder="https://linkedin.com/company/..." />
+                  <label className={labelClassName}>Lien LinkedIn de l'entreprise (Optionnel)</label>
+                  <input {...registerExperience('companyLinkedinUrl')} className={inputClassName} placeholder="https://linkedin.com/company/..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Site web entreprise</label>
-                  <input {...registerExperience('companyWebsiteUrl')} className="input" placeholder="https://..." />
+                  <label className={labelClassName}>Site web de l'entreprise (Optionnel)</label>
+                  <input {...registerExperience('companyWebsiteUrl')} className={inputClassName} placeholder="https://..." />
                 </div>
               </div>
 
-              <button type="submit" className="btn-primary" disabled={isCreatingExperience}>
-                {isCreatingExperience ? 'Publication...' : 'Publier'}
-              </button>
+              <div className="pt-6 border-t border-zinc-100 flex justify-end">
+                <button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all uppercase tracking-widest text-xs" disabled={isCreatingExperience}>
+                  {isCreatingExperience ? 'Publication...' : 'Publier ce retour d\'expérience'}
+                </button>
+              </div>
             </form>
           )}
 
-          <div className="space-y-3">
-            {(myExperiences || []).length === 0 && (
-              <div className="card text-sm text-gray-500">Aucune experience partagee pour le moment.</div>
+          {/* List of User's Experiences */}
+          <div className="space-y-4">
+            {(myExperiences || []).length === 0 && !showExperienceForm && (
+              <div className="bg-white/50 backdrop-blur-md border border-zinc-200 rounded-3xl p-12 text-center shadow-sm">
+                <p className="text-zinc-500 text-lg">Vous n'avez pas encore partagé d'expérience.</p>
+                <p className="text-zinc-400 mt-2">Enrichissez votre CV en ajoutant vos stages récents.</p>
+              </div>
             )}
 
-            {(myExperiences || []).map((experience) => (
-              <article key={experience._id} className="card space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="font-semibold">{experience.companyName}</h3>
-                  <span className="text-xs text-gray-500">
+            {(myExperiences || []).map((experience, i) => (
+              <article 
+                key={experience._id} 
+                className="bg-white p-6 sm:p-8 rounded-[24px] border border-zinc-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-5px_rgba(0,0,0,0.1)] transition-all reveal-on-scroll relative overflow-hidden group"
+                style={{ transitionDelay: `${i * 50}ms` }}
+              >
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-900 leading-tight mb-1">{experience.companyName}</h3>
+                    <p className="text-sm font-semibold text-zinc-500 flex items-center gap-2">
+                      <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase tracking-wider text-[10px]">
+                        {EXPERIENCE_TYPES.find(t => t.value === experience.experienceType)?.label || experience.experienceType}
+                      </span>
+                      • {experience.location}
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold bg-zinc-100 text-zinc-600 px-3 py-1.5 rounded-full whitespace-nowrap">
                     {formatDate(experience.startDate)} - {formatDate(experience.endDate)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">{experience.location}</p>
-                {experience.description && <p className="text-sm text-gray-600">{experience.description}</p>}
+                
+                {experience.description && (
+                  <p className="text-zinc-600 leading-relaxed text-sm mb-4">{experience.description}</p>
+                )}
+                
                 {Array.isArray(experience.technologies) && experience.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {experience.technologies.map((tech) => (
-                      <span key={tech} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                      <span key={tech} className="text-[11px] px-2.5 py-1 rounded-lg border border-zinc-200 text-zinc-700 font-bold uppercase tracking-wider bg-zinc-50">
                         {tech}
                       </span>
                     ))}

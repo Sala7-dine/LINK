@@ -2,13 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { offerService } from '../../services';
 import { toast } from 'react-toastify';
+import { MapPinIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 
 const COLUMNS = [
-  { id: 'interested', label: 'Intéressé', color: 'bg-blue-500' },
-  { id: 'applied', label: 'Postulé', color: 'bg-yellow-500' },
-  { id: 'interview', label: 'Entretien', color: 'bg-purple-500' },
-  { id: 'accepted', label: 'Accepté', color: 'bg-green-500' },
-  { id: 'rejected', label: 'Refusé', color: 'bg-red-400' },
+  { id: 'interested', label: 'Intéressé', color: 'bg-blue-500', dot: 'bg-blue-400', light: 'bg-blue-50' },
+  { id: 'applied', label: 'Postulé', color: 'bg-yellow-500', dot: 'bg-yellow-400', light: 'bg-yellow-50' },
+  { id: 'interview', label: 'Entretien', color: 'bg-purple-500', dot: 'bg-purple-400', light: 'bg-purple-50' },
+  { id: 'accepted', label: 'Accepté', color: 'bg-green-500', dot: 'bg-green-400', light: 'bg-green-50' },
+  { id: 'rejected', label: 'Refusé', color: 'bg-red-500', dot: 'bg-red-400', light: 'bg-red-50' },
 ];
 
 export default function KanbanPage() {
@@ -33,51 +34,100 @@ export default function KanbanPage() {
 
   const byStatus = (status) => applications.filter((a) => a.status === status);
 
-  if (isLoading) return <div className="text-center py-20 text-gray-400">Chargement...</div>;
+  if (isLoading) return (
+    <div className="py-20 text-center animate-fade-in-up">
+      <div className="inline-block relative w-12 h-12">
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-green-100 rounded-full"></div>
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-green-500 rounded-full border-t-transparent animate-spin"></div>
+      </div>
+      <p className="mt-4 text-zinc-500 font-medium">Chargement de votre kanban...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Mes candidatures</h1>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {COLUMNS.map((col) => (
-            <div key={col.id} className="flex-shrink-0 w-64">
-              <div className={`flex items-center gap-2 mb-3`}>
-                <span className={`w-2.5 h-2.5 rounded-full ${col.color}`} />
-                <span className="font-medium text-sm">{col.label}</span>
-                <span className="ml-auto text-xs bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-0.5">{byStatus(col.id).length}</span>
-              </div>
-              <Droppable droppableId={col.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`min-h-[200px] rounded-xl p-2 space-y-2 transition-colors ${snapshot.isDraggingOver ? 'bg-primary-50 dark:bg-primary-900/10' : 'bg-gray-100 dark:bg-gray-800'}`}
-                  >
-                    {byStatus(col.id).map((app, index) => (
-                      <Draggable key={app._id} draggableId={app._id} index={index}>
-                        {(prov, snap) => (
-                          <div
-                            ref={prov.innerRef}
-                            {...prov.draggableProps}
-                            {...prov.dragHandleProps}
-                            className={`bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm cursor-grab active:cursor-grabbing ${snap.isDragging ? 'shadow-lg ring-1 ring-primary-400' : ''}`}
-                          >
-                            <p className="font-medium text-sm text-gray-900 dark:text-white leading-snug">{app.offer?.title || 'Offre supprimée'}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">{app.offer?.companyName || '—'}</p>
-                            {app.offer?.location && <p className="text-xs text-gray-400 mt-1">{app.offer.location}</p>}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+    <div className="space-y-8 animate-fade-in-up h-full flex flex-col">
+      <div className="max-w-xl">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Mes candidatures</h1>
+        <p className="text-lg text-zinc-500">Suivez l'avancement de vos postulations par glisser-déposer.</p>
+      </div>
+
+      <div className="flex-1 overflow-hidden min-h-[600px]">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-6 overflow-x-auto pb-6 h-full items-start">
+            {COLUMNS.map((col) => {
+              const columnApps = byStatus(col.id);
+              return (
+                <div key={col.id} className="flex-shrink-0 w-80 flex flex-col max-h-full">
+                  {/* Column Header */}
+                  <div className={`flex items-center gap-3 mb-4 px-1`}>
+                    <div className="relative flex h-3 w-3">
+                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${col.dot} opacity-50`} />
+                      <span className={`relative inline-flex rounded-full h-3 w-3 ${col.color}`} />
+                    </div>
+                    <span className="font-bold text-zinc-800 text-lg">{col.label}</span>
+                    <span className="ml-auto text-sm font-semibold bg-white border border-zinc-200 text-zinc-500 rounded-full px-3 py-0.5 shadow-sm">
+                      {columnApps.length}
+                    </span>
                   </div>
-                )}
-              </Droppable>
-            </div>
-          ))}
-        </div>
-      </DragDropContext>
+
+                  {/* Drop Zone */}
+                  <Droppable droppableId={col.id}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`flex-1 min-h-[150px] rounded-3xl p-3 space-y-3 transition-colors duration-300 border ${
+                          snapshot.isDraggingOver 
+                            ? `${col.light} border-${col.color.split('-')[1]}-200` 
+                            : 'bg-zinc-50/80 border-zinc-200/50 hover:bg-zinc-100/50'
+                        }`}
+                      >
+                        {columnApps.map((app, index) => (
+                          <Draggable key={app._id} draggableId={app._id} index={index}>
+                            {(prov, snap) => (
+                              <div
+                                ref={prov.innerRef}
+                                {...prov.draggableProps}
+                                {...prov.dragHandleProps}
+                                className={`bg-white rounded-2xl p-5 border transition-all duration-200 cursor-grab active:cursor-grabbing ${
+                                  snap.isDragging 
+                                    ? 'shadow-2xl shadow-green-900/10 border-green-500 scale-105 rotate-2 z-50' 
+                                    : 'shadow-sm border-zinc-100 hover:shadow-md hover:border-zinc-200'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-3">
+                                  <p className="font-bold text-zinc-900 leading-tight">
+                                    {app.offer?.title || 'Offre supprimée'}
+                                  </p>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2 text-sm font-semibold text-zinc-600">
+                                    <BuildingOfficeIcon className="w-4 h-4 text-zinc-400" />
+                                    {app.offer?.companyName || '—'}
+                                  </div>
+                                  
+                                  {app.offer?.location && (
+                                    <div className="flex items-center gap-2 text-sm text-zinc-500">
+                                      <MapPinIcon className="w-4 h-4 text-zinc-400" />
+                                      {app.offer.location}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </div>
+              );
+            })}
+          </div>
+        </DragDropContext>
+      </div>
     </div>
   );
 }
