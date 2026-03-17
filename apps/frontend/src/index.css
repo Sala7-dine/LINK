@@ -33,4 +33,75 @@
   .card {
     @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6;
   }
+
+  .landing-blob {
+    @apply absolute rounded-full blur-3xl pointer-events-none;
+    animation: landingBlob 10s ease-in-out infinite;
+  }
+
+  .landing-blob-a {
+    @apply w-80 h-80 bg-emerald-100/70 -top-16 -left-16;
+  }
+
+  .landing-blob-b {
+    @apply w-72 h-72 bg-teal-100/70 top-24 -right-10;
+    animation-delay: 2s;
+  }
+
+  .landing-blob-c {
+    @apply w-96 h-96 bg-lime-100/70 -bottom-28 left-1/3;
+    animation-delay: 4s;
+  }
+}
+
+@keyframes landingBlob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(16px, -18px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-14px, 10px) scale(0.95);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease-out;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(228, 228, 231, 0.6);
 }

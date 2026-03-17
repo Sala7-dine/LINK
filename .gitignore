@@ -35,3 +35,7 @@ apps/backend/generated/
 # ── Coverage ───────────────────────────────────────────
 coverage/
 .nyc_output/
+
+
+
+home-template.html

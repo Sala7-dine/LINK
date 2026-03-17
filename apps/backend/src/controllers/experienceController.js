@@ -2,19 +2,28 @@ import Experience from '../models/Experience.js';
 
 const getAllExperiences = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, search } = req.query;
+    const { page = 1, limit = 'all', search } = req.query;
     const query = {};
 
     if (search) {
       query.$text = { $search: search };
     }
 
+    const shouldPaginate = limit !== 'all';
+    const parsedLimit = shouldPaginate ? Number(limit) || 20 : null;
+
     const total = await Experience.countDocuments(query);
-    const experiences = await Experience.find(query)
+    let experienceQuery = Experience.find(query)
       .populate('author', 'name avatar promotion role')
-      .sort('-createdAt')
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit));
+      .sort('-createdAt');
+
+    if (shouldPaginate) {
+      experienceQuery = experienceQuery
+        .skip((Number(page) - 1) * parsedLimit)
+        .limit(parsedLimit);
+    }
+
+    const experiences = await experienceQuery;
 
     res.status(200).json({
       status: 'success',

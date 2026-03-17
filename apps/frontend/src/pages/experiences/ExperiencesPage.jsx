@@ -18,7 +18,7 @@ export default function ExperiencesPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['experiences', search],
-    queryFn: () => experienceService.getAll({ search: search || undefined }).then((r) => r.data.data.experiences),
+    queryFn: () => experienceService.getAll({ search: search || undefined, limit: 'all' }).then((r) => r.data.data.experiences),
   });
 
   const experiences = useMemo(() => data || [], [data]);

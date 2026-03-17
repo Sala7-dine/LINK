@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const baseNav = [
+  { to: '/home', label: 'Home', icon: HomeIcon },
   { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
   { to: '/companies', label: 'Entreprises', icon: BuildingOffice2Icon },
   { to: '/offers', label: 'Offres', icon: BriefcaseIcon },

@@ -10,6 +10,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterSchoolPage from './pages/auth/RegisterSchoolPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import HomePage from './pages/home/HomePage';
 import CompaniesPage from './pages/companies/CompaniesPage';
 import CompanyDetailPage from './pages/companies/CompanyDetailPage';
 import OffersPage from './pages/offers/OffersPage';
@@ -21,12 +22,13 @@ import ImportStudentsPage from './pages/schools/ImportStudentsPage';
 import UsersManagementPage from './pages/users/UsersManagementPage';
 import CompanyApplicationsPage from './pages/company/CompanyApplicationsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import LandingPage from './pages/landing/LandingPage';
 
 const getDashboardPathByRole = (role) => {
   if (role === 'school_admin') return '/admin/dashboard';
   if (role === 'super_admin') return '/platform/dashboard';
   if (role === 'company_admin') return '/company/applications';
-  return '/student/dashboard';
+  return '/home';
 };
 
 const ProtectedRoute = ({ children, roles }) => {
@@ -43,9 +45,13 @@ const DashboardRedirect = () => {
 };
 
 export default function App() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <LandingPage />} />
+
         {/* Auth */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
@@ -56,10 +62,10 @@ export default function App() {
 
         {/* App */}
         <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-          <Route index element={<DashboardRedirect />} />
+          <Route index element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/dashboard" element={<DashboardRedirect />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute roles={['school_admin']}><DashboardPage /></ProtectedRoute>} />
-          <Route path="/student/dashboard" element={<ProtectedRoute roles={['student']}><DashboardPage /></ProtectedRoute>} />
           <Route path="/platform/dashboard" element={<ProtectedRoute roles={['super_admin']}><DashboardPage /></ProtectedRoute>} />
           <Route path="/companies" element={<CompaniesPage />} />
           <Route path="/companies/:id" element={<CompanyDetailPage />} />
