@@ -49,28 +49,45 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 z-20 transition-all duration-300 ${open ? 'w-64' : 'w-16'}`}>
-      <div className="flex items-center gap-3 h-16 px-4 border-b border-gray-100 dark:border-gray-800">
-        <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold text-lg select-none">L</div>
-        {open && <span className="font-bold text-lg text-primary-500">LINK</span>}
+    <aside className={`fixed top-0 left-0 h-full bg-white/60 backdrop-blur-2xl border-r border-white/40 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.05)] z-20 transition-all duration-300 ${open ? 'w-64' : 'w-20'}`}>
+      <div className="flex items-center gap-3 h-20 px-5 border-b border-zinc-200/50 bg-white/30">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-md flex items-center justify-center text-white font-bold text-xl select-none ring-2 ring-white/50 flex-shrink-0">L</div>
+        {open && <span className="font-bold text-2xl tracking-tight text-zinc-900">LINK</span>}
       </div>
-      <nav className="mt-4 flex flex-col gap-1 px-2">
+      <nav className="mt-6 flex flex-col gap-2 px-3 relative z-10">
         {nav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+              `relative flex items-center gap-3 px-3 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 group overflow-hidden
               ${isActive
-                ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`
+                ? 'bg-white shadow-sm border border-white/80 text-green-600 scale-[1.02] transform'
+                : 'text-zinc-500 hover:bg-white/50 hover:text-zinc-900 hover:scale-[1.02] transform border border-transparent'}`
             }
           >
-            <Icon className="w-5 h-5 flex-shrink-0" />
-            {open && <span>{label}</span>}
+            {({ isActive }) => (
+              <>
+                <div className={`absolute inset-0 bg-gradient-to-r from-green-500/10 to-transparent transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                
+                <div className="relative flex items-center justify-center w-8 h-8 rounded-xl shrink-0">
+                   <Icon className={`w-6 h-6 z-10 transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-sm' : 'group-hover:scale-110'}`} />
+                </div>
+                
+                {open && <span className="relative z-10 whitespace-nowrap">{label}</span>}
+                
+                {/* Active Indicator Line */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-green-500 rounded-r-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
+      
+      {/* Decorative gradient overlay */}
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
     </aside>
   );
 }
