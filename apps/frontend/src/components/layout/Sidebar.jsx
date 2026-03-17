@@ -12,33 +12,41 @@ import {
   UsersIcon,
 } from '@heroicons/react/24/outline';
 
-const baseNav = [
-  { to: '/home', label: 'Home', icon: HomeIcon },
-  { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
-  { to: '/companies', label: 'Entreprises', icon: BuildingOffice2Icon },
-  { to: '/offers', label: 'Offres', icon: BriefcaseIcon },
-  { to: '/experiences', label: 'Experiences', icon: BriefcaseIcon },
-  { to: '/kanban', label: 'Mes candidatures', icon: ViewColumnsIcon },
-  { to: '/profile', label: 'Mon profil', icon: UserCircleIcon },
-];
-
 export default function Sidebar() {
   const open = useSelector(selectSidebarOpen);
   const user = useSelector(selectUser);
   const isSchoolAdmin = ['school_admin', 'super_admin'].includes(user?.role);
   const isCompanyAdmin = user?.role === 'company_admin';
-  const nav = isSchoolAdmin
-    ? [
-      ...baseNav,
-      { to: '/admin/import-students', label: 'Import etudiants', icon: ArrowUpTrayIcon },
+  
+  let nav = [];
+  
+  if (isSchoolAdmin) {
+    nav = [
+      { to: user?.role === 'school_admin' ? '/admin/dashboard' : '/platform/dashboard', label: 'Statistiques', icon: HomeIcon },
+      { to: '/profile', label: 'Mon profil', icon: UserCircleIcon },
+      { to: '/companies', label: 'Entreprises', icon: BuildingOffice2Icon },
+      { to: '/offers', label: 'Offres', icon: BriefcaseIcon },
+      { to: '/admin/import-students', label: 'Import étudiants', icon: ArrowUpTrayIcon },
       { to: '/admin/users', label: 'Gestion users', icon: UsersIcon },
-    ]
-    : isCompanyAdmin
-      ? [
-        ...baseNav,
-        { to: '/company/applications', label: 'Candidatures recues', icon: UsersIcon },
-      ]
-    : baseNav;
+    ];
+  } else if (isCompanyAdmin) {
+    nav = [
+      { to: '/company/applications', label: 'Tableau de bord', icon: HomeIcon },
+      { to: '/profile', label: 'Mon profil', icon: UserCircleIcon },
+      { to: '/companies', label: 'Annuaire Entreprises', icon: BuildingOffice2Icon },
+      { to: '/offers', label: 'Offres postées', icon: BriefcaseIcon },
+    ];
+  } else {
+    nav = [
+      { to: '/home', label: 'Home', icon: HomeIcon },
+      { to: '/dashboard', label: 'Dashboard', icon: HomeIcon },
+      { to: '/companies', label: 'Entreprises', icon: BuildingOffice2Icon },
+      { to: '/offers', label: 'Offres', icon: BriefcaseIcon },
+      { to: '/experiences', label: 'Experiences', icon: BriefcaseIcon },
+      { to: '/kanban', label: 'Mes candidatures', icon: ViewColumnsIcon },
+      { to: '/profile', label: 'Mon profil', icon: UserCircleIcon },
+    ];
+  }
 
   return (
     <aside className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 z-20 transition-all duration-300 ${open ? 'w-64' : 'w-16'}`}>

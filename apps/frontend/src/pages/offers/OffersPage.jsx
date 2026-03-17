@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PageHero from '../../components/common/PageHero';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../store/slices/authSlice';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { MagnifyingGlassIcon, MapPinIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
@@ -28,6 +30,9 @@ function useRevealOnScroll() {
 }
 
 export default function OffersPage() {
+  const user = useSelector(selectUser);
+  const isStudent = user?.role === 'student';
+
   const [search, setSearch] = useState('');
   const [location, setLocation] = useState('');
   const [tech, setTech] = useState('');
@@ -52,11 +57,13 @@ export default function OffersPage() {
 
   return (
     <>
-      <PageHero 
-        title="Offres de stage" 
-        description="Explorez les opportunités disponibles et trouvez le stage fait pour vous."
-        bgImage="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000"
-      />
+      {isStudent && (
+        <PageHero 
+          title="Offres de stage" 
+          description="Explorez les opportunités disponibles et trouvez le stage fait pour vous."
+          bgImage="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000"
+        />
+      )}
       <div className="space-y-8 animate-fade-in-up">
 
       {/* Filters Bar (Glassmorphic) */}

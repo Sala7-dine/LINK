@@ -42,6 +42,7 @@ function useRevealOnScroll() {
 
 export default function ProfilePage() {
   const user = useSelector(selectUser);
+  const isStudent = user?.role === 'student';
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [showExperienceForm, setShowExperienceForm] = useState(false);
@@ -135,19 +136,21 @@ export default function ProfilePage() {
 
   return (
     <>
-      <PageHero 
-        title="Mon profil" 
-        description="Gérez vos informations personnelles et votre parcours de stage."
-        bgImage="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=2000"
-      >
-        <button 
-          onClick={downloadPdf} 
-          className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-white/20 transition-all shadow-lg"
+      {isStudent && (
+        <PageHero 
+          title="Mon profil" 
+          description="Gérez vos informations personnelles et votre parcours de stage."
+          bgImage="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=2000"
         >
-          <DocumentArrowDownIcon className="w-5 h-5" />
-          <span>Exporter (CV PDF)</span>
-        </button>
-      </PageHero>
+          <button 
+            onClick={downloadPdf} 
+            className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-white/20 transition-all shadow-lg"
+          >
+            <DocumentArrowDownIcon className="w-5 h-5" />
+            <span>Exporter (CV PDF)</span>
+          </button>
+        </PageHero>
+      )}
       <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up pb-12">
 
       {/* User Identity Card */}
