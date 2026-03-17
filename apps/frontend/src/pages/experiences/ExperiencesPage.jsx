@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
+import PageHero from '../../components/common/PageHero';
 import { useQuery } from '@tanstack/react-query';
 import { experienceService } from '../../services';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -47,17 +48,17 @@ export default function ExperiencesPage() {
   const experiences = useMemo(() => data || [], [data]);
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative">
-        <div className="max-w-xl">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Expériences Étudiant</h1>
-          <p className="text-lg text-zinc-500">Découvrez les retours de stage et emplois des anciens pour préparer votre parcours.</p>
-        </div>
-        
+    <>
+      <PageHero 
+        title="Expériences Étudiant" 
+        description="Découvrez les retours de stage et emplois des anciens pour préparer votre parcours."
+        bgImage="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=2000"
+      />
+      <div className="space-y-8 animate-fade-in-up">
         {/* Search Bar */}
-        <div className="w-full md:w-80 relative flex-shrink-0 group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <div className="flex justify-end relative">
+          <div className="w-full md:w-80 relative flex-shrink-0 group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <MagnifyingGlassIcon className="h-5 w-5 text-zinc-400 group-focus-within:text-green-500 transition-colors" />
           </div>
           <input
@@ -165,5 +166,6 @@ export default function ExperiencesPage() {
         ))}
       </div>
     </div>
+    </>
   );
 }

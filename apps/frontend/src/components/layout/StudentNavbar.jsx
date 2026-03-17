@@ -78,7 +78,7 @@ export default function StudentNavbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-          <span className="hidden sm:block text-sm text-zinc-600">{user?.name}</span>
+
           <button
             type="button"
             onClick={handleLogout}

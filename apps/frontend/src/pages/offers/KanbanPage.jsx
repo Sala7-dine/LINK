@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PageHero from '../../components/common/PageHero';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { offerService } from '../../services';
 import { toast } from 'react-toastify';
@@ -45,11 +46,13 @@ export default function KanbanPage() {
   );
 
   return (
-    <div className="space-y-8 animate-fade-in-up h-full flex flex-col">
-      <div className="max-w-xl">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Mes candidatures</h1>
-        <p className="text-lg text-zinc-500">Suivez l'avancement de vos postulations par glisser-déposer.</p>
-      </div>
+    <>
+      <PageHero 
+        title="Mes candidatures" 
+        description="Suivez l'avancement de vos postulations par glisser-déposer."
+        bgImage="https://images.unsplash.com/photo-1542621334-a254cf47733d?auto=format&fit=crop&q=80&w=2000"
+      />
+      <div className="space-y-8 animate-fade-in-up h-full flex flex-col">
 
       <div className="flex-1 overflow-hidden min-h-[600px]">
         <DragDropContext onDragEnd={onDragEnd}>
@@ -129,5 +132,6 @@ export default function KanbanPage() {
         </DragDropContext>
       </div>
     </div>
+    </>
   );
 }

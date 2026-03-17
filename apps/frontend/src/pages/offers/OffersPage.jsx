@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import PageHero from '../../components/common/PageHero';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { MagnifyingGlassIcon, MapPinIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
@@ -50,12 +51,13 @@ export default function OffersPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
-      {/* Header Section */}
-      <div className="max-w-xl">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Offres de stage</h1>
-        <p className="text-lg text-zinc-500">Explorez les opportunités disponibles et trouvez le stage fait pour vous.</p>
-      </div>
+    <>
+      <PageHero 
+        title="Offres de stage" 
+        description="Explorez les opportunités disponibles et trouvez le stage fait pour vous."
+        bgImage="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000"
+      />
+      <div className="space-y-8 animate-fade-in-up">
 
       {/* Filters Bar (Glassmorphic) */}
       <div className="bg-white/50 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-zinc-200 shadow-sm flex flex-col md:flex-row gap-4 relative z-10">
@@ -178,5 +180,6 @@ export default function OffersPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import PageHero from '../../components/common/PageHero';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
@@ -133,21 +134,21 @@ export default function ProfilePage() {
   const labelClassName = "block text-sm font-bold text-zinc-700 mb-1.5";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up pb-12">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Mon profil</h1>
-          <p className="text-lg text-zinc-500">Gérez vos informations personnelles et votre parcours de stage.</p>
-        </div>
+    <>
+      <PageHero 
+        title="Mon profil" 
+        description="Gérez vos informations personnelles et votre parcours de stage."
+        bgImage="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=2000"
+      >
         <button 
           onClick={downloadPdf} 
-          className="flex items-center justify-center gap-2 bg-white border border-zinc-200 text-zinc-700 font-semibold py-2.5 px-6 rounded-xl hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm"
+          className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-white/20 transition-all shadow-lg"
         >
           <DocumentArrowDownIcon className="w-5 h-5" />
           <span>Exporter (CV PDF)</span>
         </button>
-      </div>
+      </PageHero>
+      <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up pb-12">
 
       {/* User Identity Card */}
       <div className="bg-white p-8 rounded-[24px] border border-zinc-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] reveal-on-scroll flex flex-col sm:flex-row items-center sm:items-start gap-6 relative overflow-hidden">
@@ -371,5 +372,6 @@ export default function ProfilePage() {
         </section>
       )}
     </div>
+    </>
   );
 }
