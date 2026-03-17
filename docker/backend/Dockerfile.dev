@@ -1,0 +1,17 @@
+# Dev Dockerfile for backend — nodemon hot-reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install deps from monorepo root
+COPY package*.json ./
+COPY apps/backend/package*.json ./apps/backend/
+COPY packages/shared/package*.json ./packages/shared/
+
+RUN npm ci --workspace=apps/backend --workspace=packages/shared
+
+RUN mkdir -p apps/backend/uploads
+
+EXPOSE 5000
+
+CMD ["npx", "nodemon", "--watch", "apps/backend/src", "--ext", "js,mjs,json", "apps/backend/src/server.js"]

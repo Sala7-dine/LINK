@@ -31,16 +31,6 @@ export default function AuthLayout() {
 
         {/* Center content */}
         <div className="relative z-10 flex-1 flex flex-col justify-center">
-          {/* Snake-border mini preview */}
-          <div className="relative mb-10 max-w-sm">
-            <div className="absolute -inset-1 bg-gradient-to-r from-green-500/30 via-emerald-500/20 to-teal-500/30 rounded-2xl blur-2xl opacity-60" />
-            <div className="relative w-full rounded-2xl overflow-hidden p-[1.5px]">
-              <div className="absolute inset-[-50%] bg-[conic-gradient(transparent_270deg,#16a34a_360deg)] animate-spin" style={{ animationDuration: '4s', animationTimingFunction: 'linear' }} />
-              <div className="relative bg-zinc-900 rounded-[14px] overflow-hidden">
-                <img src={heroImage} alt="Aperçu plateforme LINK" className="w-full h-auto block rounded-[14px] opacity-80" />
-              </div>
-            </div>
-          </div>
 
           <h2 className="text-3xl font-bold text-white mb-4 leading-snug">
             Un simple lien pour<br />

@@ -1,0 +1,49 @@
+# Standalone Development Environment — Use this for hot-reload
+# Usage: docker-compose -f docker-compose.dev.yml up --build -d
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.dev
+    container_name: link_backend_dev
+    restart: unless-stopped
+    env_file: ./apps/backend/.env
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./apps/backend:/app/apps/backend
+      - ./packages/shared:/app/packages/shared
+      - uploads:/app/apps/backend/uploads
+      - /app/node_modules
+      - /app/apps/backend/node_modules
+    networks:
+      - link_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.dev
+    container_name: link_frontend_dev
+    restart: unless-stopped
+    ports:
+      - '3000:5173'
+    depends_on:
+      - backend
+    volumes:
+      - ./apps/frontend:/app/apps/frontend
+      - ./packages/shared:/app/packages/shared
+      - /app/node_modules
+      - /app/apps/frontend/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - link_network
+
+volumes:
+  uploads:
+
+networks:
+  link_network:
+    driver: bridge

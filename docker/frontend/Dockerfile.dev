@@ -1,0 +1,17 @@
+# Dev Dockerfile for frontend — Vite hot-reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install deps from monorepo root
+COPY package.json ./
+COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/shared/package.json ./packages/shared/
+
+RUN npm install --workspace=apps/frontend --workspace=packages/shared
+
+# Source files come from volume mount at runtime — no COPY needed
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--workspace=apps/frontend", "--", "--host"]
