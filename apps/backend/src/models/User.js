@@ -43,9 +43,29 @@ const userSchema = new mongoose.Schema(
     linkedinUrl: { type: String },
     portfolio: { type: String },
 
+    // Contact
+    phone: { type: String, trim: true },
+    address: { type: String, trim: true },
+
     // Profile / CV
     skills: [{ type: String, trim: true }],
+    frontendSkills: [{ type: String, trim: true }],
+    backendSkills: [{ type: String, trim: true }],
+    toolSkills: [{ type: String, trim: true }],
     softSkills: [{ type: String, trim: true }],
+    languages: [{ type: String, trim: true }],
+    hobbies: [{ type: String, trim: true }],
+    
+    educations: [
+      {
+        school: { type: String, required: true },
+        degree: { type: String, required: true },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date },
+        description: { type: String },
+      }
+    ],
+
     projects: [
       {
         title: String,

@@ -1,9 +1,19 @@
 # Dev Dockerfile for backend — nodemon hot-reload
-FROM node:20-alpine
+FROM node:20-bookworm-slim
+
+# Install Chromium and dependencies for Puppeteer
+RUN apt-get update && apt-get install -y \
+      chromium \
+      fonts-liberation \
+      fonts-noto-color-emoji \
+      fonts-noto-cjk \
+      --no-install-recommends \
+      && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
-
-# Install deps from monorepo root
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
 COPY packages/shared/package*.json ./packages/shared/

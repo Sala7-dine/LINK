@@ -54,7 +54,12 @@ const deleteMe = async (req, res, next) => {
 const generateProfilePdf = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate('tenantId', 'name logo primaryColor');
-    const pdfBuffer = await generateCandidateProfile(user);
+    
+    // Dynamically import Experience model to avoid circular dependency issues at the top of the file
+    const Experience = (await import('../models/Experience.js')).default;
+    const experiences = await Experience.find({ student: req.user._id }).sort({ endDate: -1 });
+    
+    const pdfBuffer = await generateCandidateProfile(user, experiences);
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="profile-${user._id}.pdf"` });
     res.send(pdfBuffer);
   } catch (err) {
