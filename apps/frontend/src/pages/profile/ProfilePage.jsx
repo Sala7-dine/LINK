@@ -20,7 +20,7 @@ const formatDate = (value) => {
   return new Date(value).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
 };
 
-function useRevealOnScroll() {
+function useRevealOnScroll(deps = []) {
   const ref = useRef(null);
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,7 +37,8 @@ function useRevealOnScroll() {
     const els = document.querySelectorAll('.reveal-on-scroll');
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
   return ref;
 }
 
@@ -50,7 +51,6 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [showEducationForm, setShowEducationForm] = useState(false);
   const fileInputRef = useRef(null);
-  useRevealOnScroll();
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues: {
@@ -111,6 +111,8 @@ export default function ProfilePage() {
     queryKey: ['my-experiences'],
     queryFn: () => experienceService.getMine().then((r) => r.data.data.experiences),
   });
+
+  useRevealOnScroll([myExperiences, user?.educations]);
 
   const { mutate: save } = useMutation({
     mutationFn: (data) => userService.updateMe(data),

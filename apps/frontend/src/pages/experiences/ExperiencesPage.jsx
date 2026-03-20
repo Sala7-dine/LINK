@@ -15,7 +15,7 @@ const formatDate = (value) => {
   return new Date(value).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
 };
 
-function useRevealOnScroll() {
+function useRevealOnScroll(deps = []) {
   const ref = useRef(null);
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,13 +32,13 @@ function useRevealOnScroll() {
     const els = document.querySelectorAll('.reveal-on-scroll');
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
   return ref;
 }
 
 export default function ExperiencesPage() {
   const [search, setSearch] = useState('');
-  useRevealOnScroll();
 
   const { data, isLoading } = useQuery({
     queryKey: ['experiences', search],
@@ -46,6 +46,8 @@ export default function ExperiencesPage() {
   });
 
   const experiences = useMemo(() => data || [], [data]);
+
+  useRevealOnScroll([experiences]);
 
   return (
     <>
