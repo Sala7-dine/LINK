@@ -147,6 +147,14 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku stack:set container --app ${{ secrets.HEROKU_FRONTEND_APP }}
 
+      - name: Set BACKEND_URL config var on frontend app
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          heroku config:set \
+            BACKEND_URL=https://${{ secrets.HEROKU_BACKEND_APP }}.herokuapp.com \
+            --app ${{ secrets.HEROKU_FRONTEND_APP }}
+
       - name: Release frontend on Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}

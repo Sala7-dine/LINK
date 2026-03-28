@@ -9,7 +9,12 @@ COPY apps/frontend ./apps/frontend
 RUN npm run build --workspace=apps/frontend
 
 FROM nginx:alpine
+# Supprimer la directive "user" — nginx tourne sans root sur Heroku
+RUN sed -i '/^user /d' /etc/nginx/nginx.conf
 COPY --from=builder /app/apps/frontend/dist /usr/share/nginx/html
-COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Copier le template nginx (PORT et BACKEND_URL injectés au démarrage)
+COPY docker/frontend/nginx.conf /etc/nginx/templates/default.conf.template
+COPY docker/frontend/entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/docker-entrypoint.sh"]
