@@ -15,11 +15,6 @@ router.use(authenticate);
 router.get('/', getAllExperiences);
 router.get('/me', getMyExperiences);
 
-router.post(
-  '/',
-  authorize('student'),
-  validateBody(createExperienceSchema),
-  createExperience
-);
+router.post('/', authorize('student'), validateBody(createExperienceSchema), createExperience);
 
 export default router;

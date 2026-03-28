@@ -55,7 +55,7 @@ const userSchema = new mongoose.Schema(
     softSkills: [{ type: String, trim: true }],
     languages: [{ type: String, trim: true }],
     hobbies: [{ type: String, trim: true }],
-    
+
     educations: [
       {
         school: { type: String, required: true },
@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema(
         startDate: { type: Date, required: true },
         endDate: { type: Date },
         description: { type: String },
-      }
+      },
     ],
 
     projects: [

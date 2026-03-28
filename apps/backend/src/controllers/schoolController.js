@@ -52,7 +52,10 @@ const createSchool = async (req, res, next) => {
 // PATCH /api/v1/schools/:id (admin or superadmin)
 const updateSchool = async (req, res, next) => {
   try {
-    const school = await School.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const school = await School.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!school) return res.status(404).json({ status: 'fail', message: 'School not found' });
     res.status(200).json({ status: 'success', data: { school } });
   } catch (err) {
@@ -64,7 +67,9 @@ const updateSchool = async (req, res, next) => {
 const importStudents = async (req, res, next) => {
   try {
     if (!ensureSchoolAccess(req, req.params.id)) {
-      return res.status(403).json({ status: 'fail', message: 'You can only import students for your own school' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'You can only import students for your own school' });
     }
 
     if (!req.file) return res.status(400).json({ status: 'fail', message: 'No CSV file uploaded' });
@@ -111,7 +116,9 @@ const importStudents = async (req, res, next) => {
 const inviteStudent = async (req, res, next) => {
   try {
     if (!ensureSchoolAccess(req, req.params.id)) {
-      return res.status(403).json({ status: 'fail', message: 'You can only invite students for your own school' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'You can only invite students for your own school' });
     }
 
     const { name, email, promotion } = req.body;

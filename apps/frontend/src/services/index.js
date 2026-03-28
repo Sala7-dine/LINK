@@ -36,7 +36,8 @@ export const offerService = {
   getOne: (id) => api.get(`/offers/${id}`),
   getMyApplications: () => api.get('/offers/applications/me'),
   getCompanyApplicants: (params) => api.get('/offers/company/applicants', { params }),
-  updateCompanyApplicationStatus: (id, data) => api.patch(`/offers/company/applications/${id}/status`, data),
+  updateCompanyApplicationStatus: (id, data) =>
+    api.patch(`/offers/company/applications/${id}/status`, data),
   apply: (id, data) => api.post(`/offers/${id}/apply`, data),
   updateApplication: (id, data) => api.patch(`/offers/applications/${id}`, data),
   create: (data) => api.post('/offers', data),
@@ -52,13 +53,15 @@ export const userService = {
   updateRole: (id, role) => api.patch(`/users/${id}/role`, { role }),
   setActiveStatus: (id, isActive) => api.patch(`/users/${id}/suspend`, { isActive }),
   updateMe: (data) => api.patch('/users/me', data),
-  uploadAvatar: (formData) => api.patch('/users/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  uploadAvatar: (formData) =>
+    api.patch('/users/me/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   downloadProfilePdf: () => api.get('/users/me/profile-pdf', { responseType: 'blob' }),
 };
 
 export const schoolService = {
-  importStudents: (schoolId, formData) => api.post(`/schools/${schoolId}/import-students`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  importStudents: (schoolId, formData) =>
+    api.post(`/schools/${schoolId}/import-students`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   inviteStudent: (schoolId, data) => api.post(`/schools/${schoolId}/invite-student`, data),
 };

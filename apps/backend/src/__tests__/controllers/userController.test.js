@@ -2,14 +2,13 @@ jest.mock('../../models/User.js');
 jest.mock('../../services/pdfService.js');
 
 import User from '../../models/User.js';
-import {
-  getMe,
-  updateMe,
-  suspendUser,
-  updateUserRole,
-} from '../../controllers/userController.js';
+import { getMe, updateMe, suspendUser, updateUserRole } from '../../controllers/userController.js';
 
-const makeMocks = (body = {}, params = {}, user = { _id: 'admin-id', role: 'school_admin', tenantId: 'tenant-1' }) => {
+const makeMocks = (
+  body = {},
+  params = {},
+  user = { _id: 'admin-id', role: 'school_admin', tenantId: 'tenant-1' }
+) => {
   const req = { body, params, query: {}, user, tenantId: user.tenantId };
   const res = { status: jest.fn().mockReturnThis(), json: jest.fn().mockReturnThis() };
   const next = jest.fn();
@@ -43,7 +42,11 @@ describe('updateMe()', () => {
     const updatedUser = { _id: 'user-id', name: 'Updated' };
     User.findByIdAndUpdate.mockReturnValue({ populate: jest.fn().mockResolvedValue(updatedUser) });
 
-    const { req, res, next } = makeMocks({ name: 'Updated', password: 'should-be-stripped', role: 'super_admin' });
+    const { req, res, next } = makeMocks({
+      name: 'Updated',
+      password: 'should-be-stripped',
+      role: 'super_admin',
+    });
     await updateMe(req, res, next);
 
     const updateCall = User.findByIdAndUpdate.mock.calls[0][1];
@@ -59,7 +62,9 @@ describe('suspendUser()', () => {
     const { req, res, next } = makeMocks({ isActive: false }, { id: 'admin-id' });
     await suspendUser(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('own account') }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('own account') })
+    );
   });
 
   it('returns 404 if user not found', async () => {
@@ -92,7 +97,9 @@ describe('updateUserRole()', () => {
     const { req, res, next } = makeMocks({ role: 'student' }, { id: 'admin-id' });
     await updateUserRole(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('own role') }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('own role') })
+    );
   });
 
   it('returns 404 if user not found', async () => {

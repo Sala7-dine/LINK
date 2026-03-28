@@ -13,7 +13,7 @@ const studentNav = [
 ];
 
 export default function StudentNavbar() {
-  const user = useSelector(selectUser);
+  const _user = useSelector(selectUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,7 +28,11 @@ export default function StudentNavbar() {
   }, []);
 
   const handleLogout = async () => {
-    try { await authService.logout(); } catch {}
+    try {
+      await authService.logout();
+    } catch {
+      // server-side logout errors are non-critical; proceed with local logout
+    }
     dispatch(logout());
     navigate('/login');
   };
@@ -78,7 +82,6 @@ export default function StudentNavbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-
           <button
             type="button"
             onClick={handleLogout}
@@ -93,9 +96,21 @@ export default function StudentNavbar() {
             aria-label="Menu"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {menuOpen
-                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+              {menuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
             </svg>
           </button>
         </div>

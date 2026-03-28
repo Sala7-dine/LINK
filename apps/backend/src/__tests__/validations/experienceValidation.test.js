@@ -16,13 +16,15 @@ describe('createExperienceSchema', () => {
   });
 
   it('rejects missing companyName', async () => {
-    const { companyName, ...rest } = validPayload;
+    const { companyName: _companyName, ...rest } = validPayload;
     await expect(createExperienceSchema.validate(rest)).rejects.toThrow('Company name is required');
   });
 
   it('rejects companyName exceeding 120 characters', async () => {
     const long = 'A'.repeat(121);
-    await expect(createExperienceSchema.validate({ ...validPayload, companyName: long })).rejects.toThrow('120 characters');
+    await expect(
+      createExperienceSchema.validate({ ...validPayload, companyName: long })
+    ).rejects.toThrow('120 characters');
   });
 
   it('rejects invalid experienceType', async () => {
@@ -32,7 +34,7 @@ describe('createExperienceSchema', () => {
   });
 
   it('rejects when startDate is missing (either required or endDate constraint fires)', async () => {
-    const { startDate, ...rest } = validPayload;
+    const { startDate: _startDate, ...rest } = validPayload;
     // When startDate is absent, Yup evaluates endDate.min(ref('startDate')) first,
     // which can throw before the required check. Either error is acceptable.
     await expect(createExperienceSchema.validate(rest)).rejects.toThrow(
@@ -47,7 +49,7 @@ describe('createExperienceSchema', () => {
   });
 
   it('rejects missing location', async () => {
-    const { location, ...rest } = validPayload;
+    const { location: _location, ...rest } = validPayload;
     await expect(createExperienceSchema.validate(rest)).rejects.toThrow('Location is required');
   });
 
@@ -71,7 +73,10 @@ describe('createExperienceSchema', () => {
   it('accepts all three valid experienceType values', async () => {
     const types = ['first_year_internship', 'second_year_internship', 'second_year_cdi'];
     for (const type of types) {
-      const result = await createExperienceSchema.validate({ ...validPayload, experienceType: type });
+      const result = await createExperienceSchema.validate({
+        ...validPayload,
+        experienceType: type,
+      });
       expect(result.experienceType).toBe(type);
     }
   });

@@ -4,15 +4,29 @@ export default function LandingFooter() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <p className="text-xl font-bold text-white">LINK</p>
-          <p className="text-sm text-zinc-400 mt-2">Plateforme collaborative ecoles - etudiants - entreprises.</p>
+          <p className="text-sm text-zinc-400 mt-2">
+            Plateforme collaborative ecoles - etudiants - entreprises.
+          </p>
         </div>
 
         <div>
           <p className="font-semibold text-white">Navigation</p>
           <ul className="mt-3 space-y-2 text-sm text-zinc-400">
-            <li><a href="#features" className="hover:text-white">Fonctionnalites</a></li>
-            <li><a href="#offers" className="hover:text-white">Opportunites</a></li>
-            <li><a href="#community" className="hover:text-white">Communaute</a></li>
+            <li>
+              <a href="#features" className="hover:text-white">
+                Fonctionnalites
+              </a>
+            </li>
+            <li>
+              <a href="#offers" className="hover:text-white">
+                Opportunites
+              </a>
+            </li>
+            <li>
+              <a href="#community" className="hover:text-white">
+                Communaute
+              </a>
+            </li>
           </ul>
         </div>
 

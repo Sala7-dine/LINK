@@ -5,7 +5,11 @@ import Review from '../../models/Review.js';
 import Company from '../../models/Company.js';
 import { createReview, likeReview, moderateReview } from '../../controllers/reviewController.js';
 
-const makeMocks = (body = {}, params = {}, user = { _id: 'user-id', role: 'student', tenantId: 'tenant-1' }) => {
+const makeMocks = (
+  body = {},
+  params = {},
+  user = { _id: 'user-id', role: 'student', tenantId: 'tenant-1' }
+) => {
   const req = { body, params, user, tenantId: user.tenantId, files: null };
   const res = { status: jest.fn().mockReturnThis(), json: jest.fn().mockReturnThis() };
   const next = jest.fn();
@@ -18,13 +22,18 @@ describe('createReview()', () => {
     const fakeReview = { _id: 'rev-1', globalRating: 4 };
     Review.create.mockResolvedValue(fakeReview);
 
-    const { req, res, next } = makeMocks({ globalRating: 4, content: 'Great company' }, { companyId: 'company-1' });
+    const { req, res, next } = makeMocks(
+      { globalRating: 4, content: 'Great company' },
+      { companyId: 'company-1' }
+    );
     await createReview(req, res, next);
 
-    expect(Review.create).toHaveBeenCalledWith(expect.objectContaining({
-      company: 'company-1',
-      author: 'user-id',
-    }));
+    expect(Review.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        company: 'company-1',
+        author: 'user-id',
+      })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ status: 'success' }));
   });
@@ -78,7 +87,9 @@ describe('moderateReview()', () => {
     const { req, res, next } = makeMocks({ status: 'maybe' }, { id: 'rev-1' });
     await moderateReview(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('approved or rejected') }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('approved or rejected') })
+    );
   });
 
   it('returns 404 if review not found', async () => {

@@ -6,7 +6,10 @@ import { toast } from 'react-toastify';
 const Stars = ({ value }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map((i) => (
-      <StarIcon key={i} className={`w-4 h-4 ${i <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+      <StarIcon
+        key={i}
+        className={`w-4 h-4 ${i <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+      />
     ))}
   </div>
 );
@@ -29,7 +32,10 @@ export default function ReviewCard({ review }) {
   });
 
   const author = review.isAnonymous ? 'Anonyme' : review.author?.name;
-  const date = new Date(review.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const date = new Date(review.createdAt).toLocaleDateString('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+  });
 
   return (
     <div className="card space-y-3">
@@ -54,28 +60,52 @@ export default function ReviewCard({ review }) {
           </span>
         )}
         {review.isPaid !== undefined && (
-          <span className={`px-2 py-0.5 rounded-full ${review.isPaid ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-            {review.isPaid ? `Rémunéré ${review.salary ? '· ' + review.salary + '€' : ''}` : 'Non rémunéré'}
+          <span
+            className={`px-2 py-0.5 rounded-full ${review.isPaid ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}
+          >
+            {review.isPaid
+              ? `Rémunéré ${review.salary ? '· ' + review.salary + '€' : ''}`
+              : 'Non rémunéré'}
           </span>
         )}
-        {review.duration && <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{review.duration}</span>}
+        {review.duration && (
+          <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
+            {review.duration}
+          </span>
+        )}
       </div>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{review.content}</p>
 
       {(review.pros || review.cons) && (
         <div className="grid grid-cols-2 gap-3 text-xs">
-          {review.pros && <div className="bg-green-50 dark:bg-green-900/10 rounded-lg p-2"><span className="font-medium text-green-700 dark:text-green-400">+ Avantages</span><p className="text-gray-600 dark:text-gray-400 mt-1">{review.pros}</p></div>}
-          {review.cons && <div className="bg-red-50 dark:bg-red-900/10 rounded-lg p-2"><span className="font-medium text-red-600">- Inconvénients</span><p className="text-gray-600 dark:text-gray-400 mt-1">{review.cons}</p></div>}
+          {review.pros && (
+            <div className="bg-green-50 dark:bg-green-900/10 rounded-lg p-2">
+              <span className="font-medium text-green-700 dark:text-green-400">+ Avantages</span>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">{review.pros}</p>
+            </div>
+          )}
+          {review.cons && (
+            <div className="bg-red-50 dark:bg-red-900/10 rounded-lg p-2">
+              <span className="font-medium text-red-600">- Inconvénients</span>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">{review.cons}</p>
+            </div>
+          )}
         </div>
       )}
 
       <div className="flex items-center gap-4 pt-1 border-t border-gray-100 dark:border-gray-700">
-        <button onClick={() => like()} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-600 transition-colors">
+        <button
+          onClick={() => like()}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-600 transition-colors"
+        >
           <HandThumbUpIcon className="w-4 h-4" />
           <span>{review.likesCount || 0}</span>
         </button>
-        <button onClick={() => flag()} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-500 transition-colors ml-auto">
+        <button
+          onClick={() => flag()}
+          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-500 transition-colors ml-auto"
+        >
           <FlagIcon className="w-4 h-4" />
           Signaler
         </button>

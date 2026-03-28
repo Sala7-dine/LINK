@@ -3,9 +3,9 @@ import fs from 'fs';
 import path from 'path';
 
 const generateCandidateProfile = async (user, experiences = []) => {
-  const browser = await puppeteer.launch({ 
+  const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
   });
   const page = await browser.newPage();
 
@@ -14,7 +14,8 @@ const generateCandidateProfile = async (user, experiences = []) => {
     return new Date(dateStr).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
   };
 
-  const getBadges = (arr) => (arr || []).map(item => `<span class="badge">${item}</span>`).join('');
+  const getBadges = (arr) =>
+    (arr || []).map((item) => `<span class="badge">${item}</span>`).join('');
 
   let avatarDataUri = '';
   if (user.avatar) {
@@ -28,9 +29,11 @@ const generateCandidateProfile = async (user, experiences = []) => {
         const base64Str = fs.readFileSync(filePath, { encoding: 'base64' });
         avatarDataUri = `data:image/${mime};base64,${base64Str}`;
       } else {
+        // eslint-disable-next-line no-console
         console.warn('Avatar file not found at:', filePath);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load avatar for PDF:', err);
     }
   }
@@ -193,7 +196,7 @@ const generateCandidateProfile = async (user, experiences = []) => {
     <!-- LEFT COLUMN -->
     <div class="col-left">
       <div class="profile-img-container">
-        ${avatarDataUri ? `<img src="${avatarDataUri}" onerror="this.style.display='none'"/>` : (user.name ? user.name.charAt(0).toUpperCase() : '')}
+        ${avatarDataUri ? `<img src="${avatarDataUri}" onerror="this.style.display='none'"/>` : user.name ? user.name.charAt(0).toUpperCase() : ''}
       </div>
 
       <div class="section-title" style="margin-top: 0;">Contact</div>
@@ -204,45 +207,80 @@ const generateCandidateProfile = async (user, experiences = []) => {
       ${user.githubUrl ? `<div class="contact-item"><strong>GitHub</strong>${user.githubUrl.replace(/^https?:\/\//, '')}</div>` : ''}
       ${user.portfolio ? `<div class="contact-item"><strong>Portfolio</strong>${user.portfolio.replace(/^https?:\/\//, '')}</div>` : ''}
 
-      ${(user.frontendSkills?.length || user.backendSkills?.length || user.toolSkills?.length || user.skills?.length) ? `
+      ${
+        user.frontendSkills?.length ||
+        user.backendSkills?.length ||
+        user.toolSkills?.length ||
+        user.skills?.length
+          ? `
       <div class="section-title">Compétences Techniques</div>
-      ` : ''}
+      `
+          : ''
+      }
       
-      ${user.frontendSkills?.length ? `
+      ${
+        user.frontendSkills?.length
+          ? `
       <div class="contact-item"><strong>Front-end</strong>
         <div class="badge-container">${getBadges(user.frontendSkills)}</div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
       
-      ${user.backendSkills?.length ? `
+      ${
+        user.backendSkills?.length
+          ? `
       <div class="contact-item"><strong>Back-end</strong>
         <div class="badge-container">${getBadges(user.backendSkills)}</div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
 
-      ${user.toolSkills?.length ? `
+      ${
+        user.toolSkills?.length
+          ? `
       <div class="contact-item"><strong>Outils & Base de données</strong>
         <div class="badge-container">${getBadges(user.toolSkills)}</div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
       
       ${/* Fallback to generic skills if specific ones aren't populated */ ''}
-      ${user.skills?.length && !user.frontendSkills?.length && !user.backendSkills?.length ? `
+      ${
+        user.skills?.length && !user.frontendSkills?.length && !user.backendSkills?.length
+          ? `
       <div class="contact-item"><strong>Général</strong>
         <div class="badge-container">${getBadges(user.skills)}</div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
 
-      ${user.softSkills?.length ? `
+      ${
+        user.softSkills?.length
+          ? `
       <div class="section-title">Savoir-être</div>
       <div class="badge-container">${getBadges(user.softSkills)}</div>
-      ` : ''}
+      `
+          : ''
+      }
 
-      ${user.languages?.length ? `
+      ${
+        user.languages?.length
+          ? `
       <div class="section-title">Langues</div>
-      ${user.languages.map(l => `<div class="list-item">• ${l}</div>`).join('')}
-      ` : ''}
+      ${user.languages.map((l) => `<div class="list-item">• ${l}</div>`).join('')}
+      `
+          : ''
+      }
 
-      ${user.hobbies?.length ? `
+      ${
+        user.hobbies?.length
+          ? `
       <div class="section-title">Centres d'intérêt</div>
-      ${user.hobbies.map(h => `<div class="list-item">• ${h}</div>`).join('')}
-      ` : ''}
+      ${user.hobbies.map((h) => `<div class="list-item">• ${h}</div>`).join('')}
+      `
+          : ''
+      }
     </div>
 
     <!-- RIGHT COLUMN -->
@@ -252,9 +290,13 @@ const generateCandidateProfile = async (user, experiences = []) => {
       
       ${user.bio ? `<div class="bio">${user.bio}</div>` : ''}
 
-      ${experiences.length > 0 ? `
+      ${
+        experiences.length > 0
+          ? `
       <div class="section-title">Expériences Professionnelles</div>
-      ${experiences.map(exp => `
+      ${experiences
+        .map(
+          (exp) => `
         <div class="timeline-item">
           <div class="timeline-header">
             <div class="timeline-title">${exp.companyName}</div>
@@ -264,12 +306,20 @@ const generateCandidateProfile = async (user, experiences = []) => {
           <div class="timeline-desc">${exp.description || ''}</div>
           ${exp.technologies?.length ? `<div class="badge-container" style="margin-top: 6px;">${getBadges(exp.technologies)}</div>` : ''}
         </div>
-      `).join('')}
-      ` : ''}
+      `
+        )
+        .join('')}
+      `
+          : ''
+      }
 
-      ${user.educations && user.educations.length > 0 ? `
+      ${
+        user.educations && user.educations.length > 0
+          ? `
       <div class="section-title">Formation</div>
-      ${user.educations.map(edu => `
+      ${user.educations
+        .map(
+          (edu) => `
         <div class="timeline-item">
           <div class="timeline-header">
             <div class="timeline-title">${edu.degree}</div>
@@ -278,12 +328,20 @@ const generateCandidateProfile = async (user, experiences = []) => {
           <div class="timeline-subtitle">${edu.school}</div>
           ${edu.description ? `<div class="timeline-desc">${edu.description}</div>` : ''}
         </div>
-      `).join('')}
-      ` : ''}
+      `
+        )
+        .join('')}
+      `
+          : ''
+      }
 
-      ${user.projects && user.projects.length > 0 ? `
+      ${
+        user.projects && user.projects.length > 0
+          ? `
       <div class="section-title">Projets Personnels</div>
-      ${user.projects.map(proj => `
+      ${user.projects
+        .map(
+          (proj) => `
         <div class="timeline-item">
           <div class="timeline-header">
             <div class="timeline-title">${proj.title}</div>
@@ -292,8 +350,12 @@ const generateCandidateProfile = async (user, experiences = []) => {
           <div class="timeline-desc">${proj.description || ''}</div>
           ${proj.technologies?.length ? `<div class="badge-container" style="margin-top: 6px;">${getBadges(proj.technologies)}</div>` : ''}
         </div>
-      `).join('')}
-      ` : ''}
+      `
+        )
+        .join('')}
+      `
+          : ''
+      }
 
     </div>
   </div>
@@ -301,10 +363,10 @@ const generateCandidateProfile = async (user, experiences = []) => {
 </html>`;
 
   await page.setContent(html, { waitUntil: 'networkidle0' });
-  const pdfBuffer = await page.pdf({ 
-    format: 'A4', 
+  const pdfBuffer = await page.pdf({
+    format: 'A4',
     printBackground: true,
-    margin: { top: '0', right: '0', bottom: '0', left: '0' }
+    margin: { top: '0', right: '0', bottom: '0', left: '0' },
   });
   await browser.close();
   return pdfBuffer;

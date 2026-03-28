@@ -1,7 +1,7 @@
 import passport from 'passport';
-import {Strategy as JwtStrategy, ExtractJwt} from 'passport-jwt';
-import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
-import {Strategy as GitHubStrategy} from 'passport-github2';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as GitHubStrategy } from 'passport-github2';
 import User from '../models/User.js';
 
 // ── JWT Strategy ─────────────────────────────────────

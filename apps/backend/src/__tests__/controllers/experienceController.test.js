@@ -32,7 +32,11 @@ describe('getAllExperiences()', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'success', total: 1, data: { experiences: fakeExperiences } })
+      expect.objectContaining({
+        status: 'success',
+        total: 1,
+        data: { experiences: fakeExperiences },
+      })
     );
   });
 
@@ -95,13 +99,19 @@ describe('createExperience()', () => {
   };
 
   it('returns 201 with the created experience', async () => {
-    const savedExp = { _id: 'exp-new', ...expBody, populate: jest.fn().mockResolvedValue({ _id: 'exp-new', ...expBody }) };
+    const savedExp = {
+      _id: 'exp-new',
+      ...expBody,
+      populate: jest.fn().mockResolvedValue({ _id: 'exp-new', ...expBody }),
+    };
     Experience.create.mockResolvedValue(savedExp);
 
     const { req, res, next } = makeMocks(expBody);
     await createExperience(req, res, next);
 
-    expect(Experience.create).toHaveBeenCalledWith(expect.objectContaining({ companyName: 'Capgemini', author: 'user-001' }));
+    expect(Experience.create).toHaveBeenCalledWith(
+      expect.objectContaining({ companyName: 'Capgemini', author: 'user-001' })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ status: 'success' }));
   });

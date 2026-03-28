@@ -11,7 +11,16 @@ const getOfferScope = (req) => {
 // GET /api/v1/offers
 const getOffers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, search, location, remote, tech, contractType, source } = req.query;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      location,
+      remote,
+      tech,
+      contractType,
+      source,
+    } = req.query;
     const query = { isActive: true, ...getOfferScope(req) };
     if (location) query.location = new RegExp(location, 'i');
     if (remote === 'true') query.isRemote = true;
@@ -35,7 +44,10 @@ const getOffers = async (req, res, next) => {
 // GET /api/v1/offers/:id
 const getOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findOne({ _id: req.params.id, ...getOfferScope(req) }).populate('company', 'name logo city averageRating');
+    const offer = await Offer.findOne({ _id: req.params.id, ...getOfferScope(req) }).populate(
+      'company',
+      'name logo city averageRating'
+    );
     if (!offer) return res.status(404).json({ status: 'fail', message: 'Offer not found' });
     res.status(200).json({ status: 'success', data: { offer } });
   } catch (err) {
@@ -49,7 +61,9 @@ const createOffer = async (req, res, next) => {
     let payload;
     if (req.user.role === 'company_admin') {
       if (!req.body.companyName) {
-        return res.status(400).json({ status: 'fail', message: 'companyName is required for company admin offers' });
+        return res
+          .status(400)
+          .json({ status: 'fail', message: 'companyName is required for company admin offers' });
       }
       payload = {
         ...req.body,
@@ -100,7 +114,9 @@ const syncExternalOffers = async (req, res, next) => {
 const getMyApplications = async (req, res, next) => {
   try {
     if (!req.tenantId) {
-      return res.status(403).json({ status: 'fail', message: 'Tenant context is required for student applications' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'Tenant context is required for student applications' });
     }
     const applications = await Application.find({ student: req.user._id, tenantId: req.tenantId })
       .populate('offer', 'title companyName location contractType technologies')
@@ -115,7 +131,9 @@ const getMyApplications = async (req, res, next) => {
 const applyToOffer = async (req, res, next) => {
   try {
     if (!req.tenantId) {
-      return res.status(403).json({ status: 'fail', message: 'Tenant context is required for applications' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'Tenant context is required for applications' });
     }
 
     const application = await Application.create({
@@ -134,7 +152,9 @@ const applyToOffer = async (req, res, next) => {
 const updateApplicationStatus = async (req, res, next) => {
   try {
     if (!req.tenantId) {
-      return res.status(403).json({ status: 'fail', message: 'Tenant context is required for applications' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'Tenant context is required for applications' });
     }
 
     const application = await Application.findOneAndUpdate(
@@ -142,7 +162,8 @@ const updateApplicationStatus = async (req, res, next) => {
       { status: req.body.status, notes: req.body.notes },
       { new: true, runValidators: true }
     );
-    if (!application) return res.status(404).json({ status: 'fail', message: 'Application not found' });
+    if (!application)
+      return res.status(404).json({ status: 'fail', message: 'Application not found' });
     res.status(200).json({ status: 'success', data: { application } });
   } catch (err) {
     next(err);
@@ -153,9 +174,7 @@ const updateApplicationStatus = async (req, res, next) => {
 const getCompanyApplicants = async (req, res, next) => {
   try {
     const { status, search, sortBy = 'recent' } = req.query;
-    const offerFilter = req.user.role === 'company_admin'
-      ? { postedBy: req.user._id }
-      : {};
+    const offerFilter = req.user.role === 'company_admin' ? { postedBy: req.user._id } : {};
 
     const offers = await Offer.find(offerFilter).select('_id title companyName');
     const offerIds = offers.map((o) => o._id);
@@ -173,7 +192,10 @@ const getCompanyApplicants = async (req, res, next) => {
 
     const applications = await Application.find(appQuery)
       .populate('offer', 'title companyName location contractType')
-      .populate('student', 'name email avatar promotion bio skills githubUrl linkedinUrl portfolio projects')
+      .populate(
+        'student',
+        'name email avatar promotion bio skills githubUrl linkedinUrl portfolio projects'
+      )
       .sort(sort);
 
     const normalizedSearch = search?.trim().toLowerCase();
@@ -182,9 +204,11 @@ const getCompanyApplicants = async (req, res, next) => {
           const candidateName = app.student?.name?.toLowerCase() || '';
           const candidateEmail = app.student?.email?.toLowerCase() || '';
           const offerTitle = app.offer?.title?.toLowerCase() || '';
-          return candidateName.includes(normalizedSearch)
-            || candidateEmail.includes(normalizedSearch)
-            || offerTitle.includes(normalizedSearch);
+          return (
+            candidateName.includes(normalizedSearch) ||
+            candidateEmail.includes(normalizedSearch) ||
+            offerTitle.includes(normalizedSearch)
+          );
         })
       : applications;
 
@@ -207,23 +231,31 @@ const updateCompanyApplicationStatus = async (req, res, next) => {
       });
     }
 
-    const application = await Application.findById(req.params.id).populate('offer', 'postedBy title companyName');
+    const application = await Application.findById(req.params.id).populate(
+      'offer',
+      'postedBy title companyName'
+    );
     if (!application) {
       return res.status(404).json({ status: 'fail', message: 'Application not found' });
     }
 
     if (
-      req.user.role === 'company_admin'
-      && String(application.offer?.postedBy) !== String(req.user._id)
+      req.user.role === 'company_admin' &&
+      String(application.offer?.postedBy) !== String(req.user._id)
     ) {
-      return res.status(403).json({ status: 'fail', message: 'You can only update applications for your own offers' });
+      return res
+        .status(403)
+        .json({ status: 'fail', message: 'You can only update applications for your own offers' });
     }
 
     application.status = status;
     if (typeof notes === 'string') application.notes = notes;
     await application.save();
 
-    await application.populate('student', 'name email avatar promotion bio skills githubUrl linkedinUrl portfolio projects');
+    await application.populate(
+      'student',
+      'name email avatar promotion bio skills githubUrl linkedinUrl portfolio projects'
+    );
 
     res.status(200).json({ status: 'success', data: { application } });
   } catch (err) {
@@ -232,6 +264,14 @@ const updateCompanyApplicationStatus = async (req, res, next) => {
 };
 
 export {
-  getOffers, getOffer, createOffer, deleteOffer, syncExternalOffers,
-  getMyApplications, applyToOffer, updateApplicationStatus, getCompanyApplicants, updateCompanyApplicationStatus,
+  getOffers,
+  getOffer,
+  createOffer,
+  deleteOffer,
+  syncExternalOffers,
+  getMyApplications,
+  applyToOffer,
+  updateApplicationStatus,
+  getCompanyApplicants,
+  updateCompanyApplicationStatus,
 };

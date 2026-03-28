@@ -31,7 +31,11 @@ const inputClass =
 export default function RegisterSchoolPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
     resolver: zodResolver(schema),
   });
 
@@ -60,19 +64,39 @@ export default function RegisterSchoolPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Field label="Nom de l'école" error={errors.schoolName?.message}>
-          <input {...register('schoolName')} type="text" className={inputClass} placeholder="Ex: YouCode Marrakech" />
+          <input
+            {...register('schoolName')}
+            type="text"
+            className={inputClass}
+            placeholder="Ex: YouCode Marrakech"
+          />
         </Field>
 
         <Field label="Nom administrateur" error={errors.adminName?.message}>
-          <input {...register('adminName')} type="text" className={inputClass} placeholder="Nom complet" />
+          <input
+            {...register('adminName')}
+            type="text"
+            className={inputClass}
+            placeholder="Nom complet"
+          />
         </Field>
 
         <Field label="Email administrateur" error={errors.adminEmail?.message}>
-          <input {...register('adminEmail')} type="email" className={inputClass} placeholder="admin@ecole.ma" />
+          <input
+            {...register('adminEmail')}
+            type="email"
+            className={inputClass}
+            placeholder="admin@ecole.ma"
+          />
         </Field>
 
         <Field label="Mot de passe" error={errors.password?.message}>
-          <input {...register('password')} type="password" className={inputClass} placeholder="Minimum 8 caractères" />
+          <input
+            {...register('password')}
+            type="password"
+            className={inputClass}
+            placeholder="Minimum 8 caractères"
+          />
         </Field>
 
         <button
@@ -82,15 +106,28 @@ export default function RegisterSchoolPage() {
         >
           <span className="relative z-10">{isSubmitting ? 'Création...' : 'Créer mon école'}</span>
           <div className="absolute top-0 right-0 w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rotate-45 translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-300" />
-          <svg className="absolute top-2 right-2 w-4 h-4 text-zinc-900 z-20 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17L17 7M17 7H7M17 7V17" />
+          <svg
+            className="absolute top-2 right-2 w-4 h-4 text-zinc-900 z-20 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M7 17L17 7M17 7H7M17 7V17"
+            />
           </svg>
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-zinc-500">
         Vous avez déjà un compte ?{' '}
-        <Link to="/login" className="text-green-600 font-semibold hover:text-green-700 transition-colors">
+        <Link
+          to="/login"
+          className="text-green-600 font-semibold hover:text-green-700 transition-colors"
+        >
           Se connecter
         </Link>
       </p>

@@ -32,6 +32,7 @@ const fetchAndStore = async (keywords, location) => {
         });
       });
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.warn('[Aggregator] Indeed fetch failed:', e.message);
     }
   }
@@ -46,7 +47,9 @@ const fetchAndStore = async (keywords, location) => {
         { upsert: true }
       );
       inserted++;
-    } catch (_) {}
+    } catch (_) {
+      // skip duplicate-key errors on upsert
+    }
   }
   return inserted;
 };

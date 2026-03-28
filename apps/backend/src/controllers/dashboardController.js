@@ -13,7 +13,7 @@ const getDashboard = async (req, res, next) => {
 
     const [
       totalStudents,
-      placedStudents,
+      _placedStudents,
       reviewsThisMonth,
       applicationsThisMonth,
       topCompanies,
@@ -37,9 +37,13 @@ const getDashboard = async (req, res, next) => {
       ]),
     ]);
 
-    const placementRate = totalStudents > 0
-      ? Math.round((applicationsByStatus.find((s) => s._id === 'accepted')?.count || 0) / totalStudents * 100)
-      : 0;
+    const placementRate =
+      totalStudents > 0
+        ? Math.round(
+            ((applicationsByStatus.find((s) => s._id === 'accepted')?.count || 0) / totalStudents) *
+              100
+          )
+        : 0;
 
     res.status(200).json({
       status: 'success',

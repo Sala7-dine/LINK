@@ -20,7 +20,8 @@ const register = async (req, res, next) => {
   try {
     return res.status(403).json({
       status: 'fail',
-      message: 'Student self-registration is disabled. Please contact your school administrator for an invitation.',
+      message:
+        'Student self-registration is disabled. Please contact your school administrator for an invitation.',
     });
   } catch (err) {
     next(err);
@@ -74,7 +75,9 @@ const registerSchool = async (req, res, next) => {
       : await School.findOne({ name: schoolName });
 
     if (existingSchool) {
-      return res.status(409).json({ status: 'fail', message: 'A school tenant already exists for this name/domain' });
+      return res
+        .status(409)
+        .json({ status: 'fail', message: 'A school tenant already exists for this name/domain' });
     }
 
     const school = await School.create({
@@ -127,7 +130,9 @@ const refreshToken = async (req, res, next) => {
     res.status(200).json({ status: 'success', data: tokens });
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ status: 'fail', message: 'Refresh token expired, please login again' });
+      return res
+        .status(401)
+        .json({ status: 'fail', message: 'Refresh token expired, please login again' });
     }
     next(err);
   }
@@ -147,7 +152,10 @@ const logout = async (req, res, next) => {
 const verifyEmail = async (req, res, next) => {
   try {
     const user = await User.findOne({ verificationToken: req.params.token });
-    if (!user) return res.status(400).json({ status: 'fail', message: 'Invalid or expired verification token' });
+    if (!user)
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'Invalid or expired verification token' });
 
     user.isVerified = true;
     user.verificationToken = undefined;
@@ -163,7 +171,10 @@ const verifyEmail = async (req, res, next) => {
 const forgotPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(200).json({ status: 'success', message: 'If this email exists, a reset link was sent' });
+    if (!user)
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'If this email exists, a reset link was sent' });
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.passwordResetToken = resetToken;
@@ -171,7 +182,9 @@ const forgotPassword = async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     await sendPasswordResetEmail(user.email, resetToken);
-    res.status(200).json({ status: 'success', message: 'If this email exists, a reset link was sent' });
+    res
+      .status(200)
+      .json({ status: 'success', message: 'If this email exists, a reset link was sent' });
   } catch (err) {
     next(err);
   }
@@ -184,7 +197,8 @@ const resetPassword = async (req, res, next) => {
       passwordResetToken: req.params.token,
       passwordResetExpires: { $gt: Date.now() },
     });
-    if (!user) return res.status(400).json({ status: 'fail', message: 'Invalid or expired reset token' });
+    if (!user)
+      return res.status(400).json({ status: 'fail', message: 'Invalid or expired reset token' });
 
     user.password = req.body.password;
     user.passwordResetToken = undefined;
@@ -201,7 +215,19 @@ const resetPassword = async (req, res, next) => {
 const oauthCallback = async (req, res) => {
   const { accessToken, refreshToken } = generateTokens(req.user);
   await User.findByIdAndUpdate(req.user._id, { refreshToken });
-  res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`);
+  res.redirect(
+    `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`
+  );
 };
 
-export { register, registerSchool, login, refreshToken, logout, verifyEmail, forgotPassword, resetPassword, oauthCallback };
+export {
+  register,
+  registerSchool,
+  login,
+  refreshToken,
+  logout,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
+  oauthCallback,
+};

@@ -4,13 +4,13 @@ jest.mock('../../models/CompanyInvitation.js');
 jest.mock('../../services/emailService.js');
 
 import Company from '../../models/Company.js';
-import {
-  getCompany,
-  createCompany,
-  moderateCompany,
-} from '../../controllers/companyController.js';
+import { getCompany, createCompany, moderateCompany } from '../../controllers/companyController.js';
 
-const makeMocks = (body = {}, params = {}, user = { _id: 'admin-id', role: 'school_admin', tenantId: 'tenant-1' }) => {
+const makeMocks = (
+  body = {},
+  params = {},
+  user = { _id: 'admin-id', role: 'school_admin', tenantId: 'tenant-1' }
+) => {
   const req = { body, params, user, tenantId: user.tenantId, query: {} };
   const res = { status: jest.fn().mockReturnThis(), json: jest.fn().mockReturnThis() };
   const next = jest.fn();
@@ -24,7 +24,9 @@ describe('getCompany()', () => {
     const { req, res, next } = makeMocks({}, { id: 'company-id' });
     await getCompany(req, res, next);
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Company not found' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Company not found' })
+    );
   });
 
   it('returns 200 with company data when found', async () => {
@@ -33,7 +35,9 @@ describe('getCompany()', () => {
     const { req, res, next } = makeMocks({}, { id: 'company-id' });
     await getCompany(req, res, next);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: { company: fakeCompany } }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { company: fakeCompany } })
+    );
   });
 
   it('calls next() on error', async () => {
@@ -51,7 +55,9 @@ describe('createCompany()', () => {
     Company.create.mockResolvedValue(fakeCompany);
     const { req, res, next } = makeMocks({ name: 'ACME', city: 'Casablanca' });
     await createCompany(req, res, next);
-    expect(Company.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'pending', tenantId: 'tenant-1' }));
+    expect(Company.create).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'pending', tenantId: 'tenant-1' })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
@@ -69,7 +75,9 @@ describe('moderateCompany()', () => {
     const { req, res, next } = makeMocks({ status: 'maybe' }, { id: 'co-id' });
     await moderateCompany(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Status must be approved or rejected' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Status must be approved or rejected' })
+    );
   });
 
   it('returns 200 when company is approved', async () => {
@@ -78,7 +86,9 @@ describe('moderateCompany()', () => {
     const { req, res, next } = makeMocks({ status: 'approved' }, { id: 'co-id' });
     await moderateCompany(req, res, next);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: { company: fakeCompany } }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { company: fakeCompany } })
+    );
   });
 
   it('returns 200 when company is rejected', async () => {

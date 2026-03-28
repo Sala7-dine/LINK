@@ -6,14 +6,9 @@ jest.mock('jsonwebtoken');
 
 import jwt from 'jsonwebtoken';
 import User from '../../models/User.js';
-import School from '../../models/School.js';
-import { sendPasswordResetEmail } from '../../services/emailService.js';
-import {
-  register,
-  login,
-  refreshToken,
-  logout,
-} from '../../controllers/authController.js';
+import _School from '../../models/School.js';
+import { sendPasswordResetEmail as _sendPasswordResetEmail } from '../../services/emailService.js';
+import { register, login, refreshToken, logout } from '../../controllers/authController.js';
 
 // Helper to create mock req/res/next
 const makeMocks = (body = {}, params = {}, user = null) => {
@@ -48,11 +43,17 @@ describe('login()', () => {
     const { req, res, next } = makeMocks({ email: 'x@x.com', password: 'pass123' });
     await login(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Invalid credentials' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Invalid credentials' })
+    );
   });
 
   it('returns 401 if password does not match', async () => {
-    const mockUser = { password: 'hashed', comparePassword: jest.fn().mockResolvedValue(false), isActive: true };
+    const mockUser = {
+      password: 'hashed',
+      comparePassword: jest.fn().mockResolvedValue(false),
+      isActive: true,
+    };
     User.findOne.mockReturnValue({ select: jest.fn().mockResolvedValue(mockUser) });
     const { req, res, next } = makeMocks({ email: 'x@x.com', password: 'wrong' });
     await login(req, res, next);
@@ -60,12 +61,18 @@ describe('login()', () => {
   });
 
   it('returns 403 if account is suspended', async () => {
-    const mockUser = { password: 'hashed', comparePassword: jest.fn().mockResolvedValue(true), isActive: false };
+    const mockUser = {
+      password: 'hashed',
+      comparePassword: jest.fn().mockResolvedValue(true),
+      isActive: false,
+    };
     User.findOne.mockReturnValue({ select: jest.fn().mockResolvedValue(mockUser) });
     const { req, res, next } = makeMocks({ email: 'x@x.com', password: 'pass123' });
     await login(req, res, next);
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Account suspended' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Account suspended' })
+    );
   });
 
   it('returns 200 with tokens on successful login', async () => {
@@ -95,7 +102,9 @@ describe('refreshToken()', () => {
     const { req, res, next } = makeMocks({});
     await refreshToken(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Refresh token required' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Refresh token required' })
+    );
   });
 
   it('returns 401 if token is invalid/user not found', async () => {
@@ -113,7 +122,9 @@ describe('refreshToken()', () => {
     const { req, res, next } = makeMocks({ token: 'different-token' });
     await refreshToken(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Invalid refresh token' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Invalid refresh token' })
+    );
   });
 
   it('returns 200 with new tokens on success', async () => {

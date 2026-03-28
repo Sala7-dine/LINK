@@ -10,7 +10,12 @@ import {
   updateCompanyApplicationStatus,
 } from '../../controllers/offerController.js';
 
-const makeMocks = (body = {}, params = {}, user = { _id: 'admin-id', role: 'school_admin', tenantId: 'tenant-1' }, query = {}) => {
+const makeMocks = (
+  body = {},
+  params = {},
+  user = { _id: 'admin-id', role: 'school_admin', tenantId: 'tenant-1' },
+  query = {}
+) => {
   const req = { body, params, user, tenantId: user.tenantId, query };
   const res = { status: jest.fn().mockReturnThis(), json: jest.fn().mockReturnThis() };
   const next = jest.fn();
@@ -27,7 +32,9 @@ describe('createOffer()', () => {
     );
     await createOffer(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('companyName') }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('companyName') })
+    );
   });
 
   it('returns 201 for a company_admin with companyName', async () => {
@@ -83,7 +90,9 @@ describe('applyToOffer()', () => {
     );
     await applyToOffer(req, res, next);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: { application: fakeApp } }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { application: fakeApp } })
+    );
   });
 });
 
@@ -93,7 +102,9 @@ describe('updateCompanyApplicationStatus()', () => {
     const { req, res, next } = makeMocks({ status: 'maybe' }, { id: 'app-1' });
     await updateCompanyApplicationStatus(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('interview, accepted, rejected') }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('interview, accepted, rejected') })
+    );
   });
 
   it('returns 404 if application not found', async () => {

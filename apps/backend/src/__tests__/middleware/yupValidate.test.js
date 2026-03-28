@@ -33,9 +33,7 @@ describe('validateBody middleware', () => {
       expect.objectContaining({
         status: 'fail',
         message: 'Validation failed',
-        errors: expect.arrayContaining([
-          expect.objectContaining({ field: 'name' }),
-        ]),
+        errors: expect.arrayContaining([expect.objectContaining({ field: 'name' })]),
       })
     );
   });

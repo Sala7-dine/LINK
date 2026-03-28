@@ -10,8 +10,8 @@ import {
   inviteCompanyPartner,
 } from '../controllers/companyController.js';
 
-import {authenticate, authorize} from '../middleware/auth.js';
-import {tenantContext} from '../middleware/tenant.js';
+import { authenticate, authorize } from '../middleware/auth.js';
+import { tenantContext } from '../middleware/tenant.js';
 import { validateBody } from '../middleware/yupValidate.js';
 import reviewRoutes from './reviewRoutes.js';
 import { inviteCompanyPartnerSchema } from '../validations/companyValidation.js';

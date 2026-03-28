@@ -35,7 +35,8 @@ const ProtectedRoute = ({ children, roles }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user?.role)) return <Navigate to={getDashboardPathByRole(user?.role)} replace />;
+  if (roles && !roles.includes(user?.role))
+    return <Navigate to={getDashboardPathByRole(user?.role)} replace />;
   return children;
 };
 
@@ -61,22 +62,84 @@ export default function App() {
         </Route>
 
         {/* App */}
-        <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<DashboardRedirect />} />
-          <Route path="/home" element={<ProtectedRoute roles={['student']}><HomePage /></ProtectedRoute>} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute roles={['student']}>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/dashboard" element={<DashboardRedirect />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute roles={['school_admin']}><DashboardPage /></ProtectedRoute>} />
-          <Route path="/platform/dashboard" element={<ProtectedRoute roles={['super_admin']}><DashboardPage /></ProtectedRoute>} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute roles={['school_admin']}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/platform/dashboard"
+            element={
+              <ProtectedRoute roles={['super_admin']}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/companies" element={<CompaniesPage />} />
           <Route path="/companies/:id" element={<CompanyDetailPage />} />
           <Route path="/offers" element={<OffersPage />} />
           <Route path="/offers/:id" element={<OfferDetailPage />} />
-          <Route path="/kanban" element={<ProtectedRoute roles={['student']}><KanbanPage /></ProtectedRoute>} />
+          <Route
+            path="/kanban"
+            element={
+              <ProtectedRoute roles={['student']}>
+                <KanbanPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/experiences" element={<ProtectedRoute roles={['student']}><ExperiencesPage /></ProtectedRoute>} />
-          <Route path="/admin/import-students" element={<ProtectedRoute roles={['school_admin', 'super_admin']}><ImportStudentsPage /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute roles={['school_admin', 'super_admin']}><UsersManagementPage /></ProtectedRoute>} />
-          <Route path="/company/applications" element={<ProtectedRoute roles={['company_admin', 'super_admin']}><CompanyApplicationsPage /></ProtectedRoute>} />
+          <Route
+            path="/experiences"
+            element={
+              <ProtectedRoute roles={['student']}>
+                <ExperiencesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/import-students"
+            element={
+              <ProtectedRoute roles={['school_admin', 'super_admin']}>
+                <ImportStudentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute roles={['school_admin', 'super_admin']}>
+                <UsersManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company/applications"
+            element={
+              <ProtectedRoute roles={['company_admin', 'super_admin']}>
+                <CompanyApplicationsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

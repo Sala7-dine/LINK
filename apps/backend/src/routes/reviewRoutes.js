@@ -10,11 +10,11 @@ import {
   moderateReview,
 } from '../controllers/reviewController.js';
 
-import {authenticate, authorize} from '../middleware/auth.js';
-import {tenantContext} from '../middleware/tenant.js';
-import {validateBody} from '../middleware/yupValidate.js';
+import { authenticate, authorize } from '../middleware/auth.js';
+import { tenantContext } from '../middleware/tenant.js';
+import { validateBody } from '../middleware/yupValidate.js';
 import upload from '../middleware/upload.js';
-import {createReviewSchema} from '../validations/reviewValidation.js';
+import { createReviewSchema } from '../validations/reviewValidation.js';
 
 const router = express.Router({ mergeParams: true });
 
@@ -22,12 +22,7 @@ router.use(authenticate, tenantContext);
 
 router.get('/', getReviews);
 
-router.post(
-  '/',
-  upload.array('attachments', 3),
-  validateBody(createReviewSchema),
-  createReview
-);
+router.post('/', upload.array('attachments', 3), validateBody(createReviewSchema), createReview);
 
 router.patch('/:id', updateReview);
 router.delete('/:id', deleteReview);

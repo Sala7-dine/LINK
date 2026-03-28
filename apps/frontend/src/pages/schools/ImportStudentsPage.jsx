@@ -52,7 +52,7 @@ export default function ImportStudentsPage() {
       const input = document.getElementById('students-csv-input');
       if (input) input.value = '';
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Erreur lors de l\'import CSV');
+      toast.error(err.response?.data?.message || "Erreur lors de l'import CSV");
     } finally {
       setIsCsvSubmitting(false);
     }
@@ -83,7 +83,7 @@ export default function ImportStudentsPage() {
       setStudentEmail('');
       setStudentPromotion('');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Erreur lors de l\'invitation');
+      toast.error(err.response?.data?.message || "Erreur lors de l'invitation");
     } finally {
       setIsInviteSubmitting(false);
     }
@@ -92,7 +92,9 @@ export default function ImportStudentsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-fade-in-up">
       <div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">Import des étudiants</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 mb-2">
+          Import des étudiants
+        </h1>
         <p className="text-lg text-zinc-500">
           Ajoutez de nouveaux étudiants manuellement ou importez-les en masse.
         </p>
@@ -101,13 +103,15 @@ export default function ImportStudentsPage() {
       <div className="bg-white/60 backdrop-blur-2xl p-6 rounded-[24px] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-3">
         <p className="text-sm font-bold text-zinc-900">Format attendu pour l'import CSV</p>
         <pre className="text-xs font-mono bg-zinc-900 text-green-400 rounded-xl p-4 overflow-x-auto shadow-inner border border-zinc-800">
-name,email,promotion
-John Doe,john@school.ma,YouCode 2026
-Jane Doe,jane@school.ma,YouCode 2026
+          name,email,promotion John Doe,john@school.ma,YouCode 2026 Jane Doe,jane@school.ma,YouCode
+          2026
         </pre>
       </div>
 
-      <form onSubmit={onInviteSubmit} className="bg-white/60 backdrop-blur-2xl p-6 sm:p-8 rounded-[32px] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5 relative overflow-hidden">
+      <form
+        onSubmit={onInviteSubmit}
+        className="bg-white/60 backdrop-blur-2xl p-6 sm:p-8 rounded-[32px] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5 relative overflow-hidden"
+      >
         <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <h2 className="text-xl font-bold text-zinc-900 mb-6 relative z-10">Invitation manuelle</h2>
 
@@ -158,14 +162,23 @@ Jane Doe,jane@school.ma,YouCode 2026
           />
         </div>
 
-        <button type="submit" disabled={isInviteSubmitting} className="w-full sm:w-auto bg-zinc-900 text-white font-bold py-3 px-8 rounded-xl hover:-translate-y-0.5 shadow-lg shadow-zinc-900/20 active:scale-95 transition-all text-sm mt-2 relative z-10">
+        <button
+          type="submit"
+          disabled={isInviteSubmitting}
+          className="w-full sm:w-auto bg-zinc-900 text-white font-bold py-3 px-8 rounded-xl hover:-translate-y-0.5 shadow-lg shadow-zinc-900/20 active:scale-95 transition-all text-sm mt-2 relative z-10"
+        >
           {isInviteSubmitting ? 'Invitation en cours...' : 'Inviter un étudiant'}
         </button>
       </form>
 
-      <form onSubmit={onSubmit} className="bg-white/60 backdrop-blur-2xl p-6 sm:p-8 rounded-[32px] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5 relative overflow-hidden">
+      <form
+        onSubmit={onSubmit}
+        className="bg-white/60 backdrop-blur-2xl p-6 sm:p-8 rounded-[32px] border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5 relative overflow-hidden"
+      >
         <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-        <h2 className="text-xl font-bold text-zinc-900 mb-6 relative z-10">Import en masse (CSV)</h2>
+        <h2 className="text-xl font-bold text-zinc-900 mb-6 relative z-10">
+          Import en masse (CSV)
+        </h2>
         {needsManualSchoolId && (
           <div className="relative z-10">
             <label className="block text-sm font-bold text-zinc-700 mb-2">School ID</label>
@@ -190,7 +203,11 @@ Jane Doe,jane@school.ma,YouCode 2026
           />
         </div>
 
-        <button type="submit" disabled={isCsvSubmitting} className="w-full sm:w-auto bg-zinc-900 text-white font-bold py-3 px-8 rounded-xl hover:-translate-y-0.5 shadow-lg shadow-zinc-900/20 active:scale-95 transition-all text-sm mt-2 relative z-10">
+        <button
+          type="submit"
+          disabled={isCsvSubmitting}
+          className="w-full sm:w-auto bg-zinc-900 text-white font-bold py-3 px-8 rounded-xl hover:-translate-y-0.5 shadow-lg shadow-zinc-900/20 active:scale-95 transition-all text-sm mt-2 relative z-10"
+        >
           {isCsvSubmitting ? 'Import en cours...' : 'Importer les étudiants'}
         </button>
       </form>

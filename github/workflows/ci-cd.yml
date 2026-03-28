@@ -7,7 +7,29 @@ on:
     branches: [main]
 
 jobs:
-  # ── Lint & Test ─────────────────────────────────────
+  # ── Lint ─────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint backend
+        run: npm run lint --workspace=apps/backend
+
+      - name: Lint frontend
+        run: npm run lint --workspace=apps/frontend
+
+  # ── Lint & Test ──────────────────────────────────────
   test:
     runs-on: ubuntu-latest
     services:
@@ -27,9 +49,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint frontend
-        run: npm run lint --workspace=apps/frontend --if-present
-
       - name: Run backend tests
         env:
           NODE_ENV: test
@@ -41,7 +60,7 @@ jobs:
   # ── Build Docker images ──────────────────────────────
   build:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [lint, test]
     if: github.ref == 'refs/heads/main'
 
     steps:

@@ -60,6 +60,11 @@ const experienceSchema = new mongoose.Schema(
 );
 
 experienceSchema.index({ createdAt: -1 });
-experienceSchema.index({ companyName: 'text', location: 'text', description: 'text', technologies: 'text' });
+experienceSchema.index({
+  companyName: 'text',
+  location: 'text',
+  description: 'text',
+  technologies: 'text',
+});
 
 export default mongoose.model('Experience', experienceSchema);

@@ -18,9 +18,7 @@ const getAllExperiences = async (req, res, next) => {
       .sort('-createdAt');
 
     if (shouldPaginate) {
-      experienceQuery = experienceQuery
-        .skip((Number(page) - 1) * parsedLimit)
-        .limit(parsedLimit);
+      experienceQuery = experienceQuery.skip((Number(page) - 1) * parsedLimit).limit(parsedLimit);
     }
 
     const experiences = await experienceQuery;

@@ -1,6 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { MapPinIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import {
+  MapPinIcon,
+  BriefcaseIcon,
+  CalendarIcon,
+  CurrencyDollarIcon,
+} from '@heroicons/react/24/outline';
 import { offerService } from '../../services';
 import { toast } from 'react-toastify';
 
@@ -33,23 +38,55 @@ export default function OfferDetailPage() {
           </div>
           <div className="flex gap-2">
             {offer.externalUrl && (
-              <a href={offer.externalUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">Voir l'annonce</a>
+              <a
+                href={offer.externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-sm"
+              >
+                Voir l'annonce
+              </a>
             )}
-            <button onClick={handleApply} className="btn-primary text-sm">Postuler</button>
+            <button onClick={handleApply} className="btn-primary text-sm">
+              Postuler
+            </button>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
-          {offer.location && <span className="flex items-center gap-1"><MapPinIcon className="w-4 h-4" />{offer.location}</span>}
-          <span className="flex items-center gap-1 capitalize"><BriefcaseIcon className="w-4 h-4" />{offer.contractType}</span>
-          {offer.duration && <span className="flex items-center gap-1"><CalendarIcon className="w-4 h-4" />{offer.duration}</span>}
-          {offer.isPaid && <span className="flex items-center gap-1 text-green-600"><CurrencyDollarIcon className="w-4 h-4" />Rémunéré {offer.salary && `· ${offer.salary}`}</span>}
+          {offer.location && (
+            <span className="flex items-center gap-1">
+              <MapPinIcon className="w-4 h-4" />
+              {offer.location}
+            </span>
+          )}
+          <span className="flex items-center gap-1 capitalize">
+            <BriefcaseIcon className="w-4 h-4" />
+            {offer.contractType}
+          </span>
+          {offer.duration && (
+            <span className="flex items-center gap-1">
+              <CalendarIcon className="w-4 h-4" />
+              {offer.duration}
+            </span>
+          )}
+          {offer.isPaid && (
+            <span className="flex items-center gap-1 text-green-600">
+              <CurrencyDollarIcon className="w-4 h-4" />
+              Rémunéré {offer.salary && `· ${offer.salary}`}
+            </span>
+          )}
         </div>
 
         {offer.technologies?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-4">
             {offer.technologies.map((t) => (
-              <span key={t} className="text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 px-3 py-1 rounded-full">{t}</span>
+              <span
+                key={t}
+                className="text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 px-3 py-1 rounded-full"
+              >
+                {t}
+              </span>
             ))}
           </div>
         )}
@@ -58,14 +95,18 @@ export default function OfferDetailPage() {
       {offer.description && (
         <div className="card">
           <h2 className="font-semibold mb-3">Description du poste</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{offer.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+            {offer.description}
+          </p>
         </div>
       )}
 
       {offer.requirements && (
         <div className="card">
           <h2 className="font-semibold mb-3">Profil recherché</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{offer.requirements}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+            {offer.requirements}
+          </p>
         </div>
       )}
     </div>

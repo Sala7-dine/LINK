@@ -15,9 +15,13 @@ export default function LandingOffersPreview() {
         <div className="flex items-end justify-between mb-8 gap-3">
           <div>
             <h2 className="text-3xl font-bold text-zinc-900">Apercu des offres</h2>
-            <p className="text-zinc-600 mt-2">Exemples d opportunites publiees sur la plateforme.</p>
+            <p className="text-zinc-600 mt-2">
+              Exemples d opportunites publiees sur la plateforme.
+            </p>
           </div>
-          <Link to="/login" className="btn-secondary">Voir tout apres connexion</Link>
+          <Link to="/login" className="btn-secondary">
+            Voir tout apres connexion
+          </Link>
         </div>
 
         {isLoading && <div className="card text-center">Chargement...</div>}
@@ -26,8 +30,12 @@ export default function LandingOffersPreview() {
           {(data || []).slice(0, 4).map((offer) => (
             <article key={offer._id} className="card bg-white">
               <h3 className="font-semibold text-zinc-900">{offer.title}</h3>
-              <p className="text-sm text-zinc-500 mt-1">{offer.companyName || 'Entreprise partenaire'}</p>
-              <p className="text-sm text-zinc-600 mt-2">{offer.location || 'Localisation a definir'}</p>
+              <p className="text-sm text-zinc-500 mt-1">
+                {offer.companyName || 'Entreprise partenaire'}
+              </p>
+              <p className="text-sm text-zinc-600 mt-2">
+                {offer.location || 'Localisation a definir'}
+              </p>
             </article>
           ))}
         </div>

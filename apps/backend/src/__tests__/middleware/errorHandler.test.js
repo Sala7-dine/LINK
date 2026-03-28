@@ -32,7 +32,9 @@ describe('globalErrorHandler middleware', () => {
     const err = { code: 11000, keyValue: { email: 'test@test.com' } };
     globalErrorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ status: 'fail', message: expect.stringContaining('email') }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'fail', message: expect.stringContaining('email') })
+    );
   });
 
   it('handles Mongoose ValidationError', () => {
@@ -42,7 +44,9 @@ describe('globalErrorHandler middleware', () => {
     };
     globalErrorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ status: 'fail', message: 'Name is required' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'fail', message: 'Name is required' })
+    );
   });
 
   it('handles JsonWebTokenError', () => {
@@ -73,7 +77,9 @@ describe('globalErrorHandler middleware', () => {
     const err = { statusCode: 500, message: 'Internal failure' };
     globalErrorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Something went wrong' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Something went wrong' })
+    );
     process.env.NODE_ENV = 'test';
   });
 });

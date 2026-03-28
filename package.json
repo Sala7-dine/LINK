@@ -13,7 +13,9 @@
     "dev:frontend": "npm run dev --workspace=apps/frontend",
     "build": "npm run build --workspace=apps/frontend",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

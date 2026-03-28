@@ -83,7 +83,9 @@ const moderateCompany = async (req, res, next) => {
   try {
     const { status } = req.body;
     if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ status: 'fail', message: 'Status must be approved or rejected' });
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'Status must be approved or rejected' });
     }
     const company = await Company.findOneAndUpdate(
       { _id: req.params.id, tenantId: req.tenantId },
@@ -103,7 +105,9 @@ const inviteCompanyPartner = async (req, res, next) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ status: 'fail', message: 'A user already exists with this email' });
+      return res
+        .status(409)
+        .json({ status: 'fail', message: 'A user already exists with this email' });
     }
 
     const existingPending = await CompanyInvitation.findOne({
@@ -113,7 +117,9 @@ const inviteCompanyPartner = async (req, res, next) => {
     });
 
     if (existingPending) {
-      return res.status(409).json({ status: 'fail', message: 'A pending invitation already exists for this email' });
+      return res
+        .status(409)
+        .json({ status: 'fail', message: 'A pending invitation already exists for this email' });
     }
 
     const invitationToken = crypto.randomBytes(32).toString('hex');
@@ -163,7 +169,11 @@ const inviteCompanyPartner = async (req, res, next) => {
           expiresAt: invitation.expiresAt,
           invitedBy: invitation.invitedBy,
         },
-        user: { id: companyAdminUser._id, email: companyAdminUser.email, role: companyAdminUser.role },
+        user: {
+          id: companyAdminUser._id,
+          email: companyAdminUser.email,
+          role: companyAdminUser.role,
+        },
       },
     });
   } catch (err) {
@@ -171,4 +181,12 @@ const inviteCompanyPartner = async (req, res, next) => {
   }
 };
 
-export { getCompanies, getCompany, createCompany, updateCompany, deleteCompany, moderateCompany, inviteCompanyPartner };
+export {
+  getCompanies,
+  getCompany,
+  createCompany,
+  updateCompany,
+  deleteCompany,
+  moderateCompany,
+  inviteCompanyPartner,
+};

@@ -2,7 +2,8 @@ import User from '../models/User.js';
 import { generateCandidateProfile } from '../services/pdfService.js';
 
 const getRoleFilterForEditor = (editorRole) => {
-  if (editorRole === 'super_admin') return ['student', 'school_admin', 'company_admin', 'super_admin'];
+  if (editorRole === 'super_admin')
+    return ['student', 'school_admin', 'company_admin', 'super_admin'];
   return ['student', 'school_admin'];
 };
 
@@ -54,13 +55,16 @@ const deleteMe = async (req, res, next) => {
 const generateProfilePdf = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate('tenantId', 'name logo primaryColor');
-    
+
     // Dynamically import Experience model to avoid circular dependency issues at the top of the file
     const Experience = (await import('../models/Experience.js')).default;
     const experiences = await Experience.find({ student: req.user._id }).sort({ endDate: -1 });
-    
+
     const pdfBuffer = await generateCandidateProfile(user, experiences);
-    res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="profile-${user._id}.pdf"` });
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="profile-${user._id}.pdf"`,
+    });
     res.send(pdfBuffer);
   } catch (err) {
     next(err);
@@ -108,13 +112,16 @@ const getAllUsers = async (req, res, next) => {
 const suspendUser = async (req, res, next) => {
   try {
     if (req.params.id === String(req.user._id)) {
-      return res.status(400).json({ status: 'fail', message: 'You cannot suspend your own account' });
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'You cannot suspend your own account' });
     }
 
     const isActive = typeof req.body?.isActive === 'boolean' ? req.body.isActive : false;
-    const filter = req.user.role === 'super_admin'
-      ? { _id: req.params.id }
-      : { _id: req.params.id, tenantId: req.tenantId };
+    const filter =
+      req.user.role === 'super_admin'
+        ? { _id: req.params.id }
+        : { _id: req.params.id, tenantId: req.tenantId };
     const user = await User.findOneAndUpdate(filter, { isActive }, { new: true });
     if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
     res.status(200).json({ status: 'success', data: { user } });
@@ -137,9 +144,10 @@ const updateUserRole = async (req, res, next) => {
       return res.status(400).json({ status: 'fail', message: 'You cannot change your own role' });
     }
 
-    const filter = req.user.role === 'super_admin'
-      ? { _id: req.params.id }
-      : { _id: req.params.id, tenantId: req.tenantId, role: { $ne: 'super_admin' } };
+    const filter =
+      req.user.role === 'super_admin'
+        ? { _id: req.params.id }
+        : { _id: req.params.id, tenantId: req.tenantId, role: { $ne: 'super_admin' } };
 
     const user = await User.findOneAndUpdate(filter, { role }, { new: true, runValidators: true });
     if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
@@ -150,4 +158,13 @@ const updateUserRole = async (req, res, next) => {
   }
 };
 
-export { getMe, updateMe, deleteMe, generateProfilePdf, uploadAvatar, getAllUsers, suspendUser, updateUserRole };
+export {
+  getMe,
+  updateMe,
+  deleteMe,
+  generateProfilePdf,
+  uploadAvatar,
+  getAllUsers,
+  suspendUser,
+  updateUserRole,
+};

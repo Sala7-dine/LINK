@@ -4,8 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import mongoSanitize from 'express-mongo-sanitize';
 import passport from 'passport';
-import {globalErrorHandler, notFound} from './middleware/errorHandler.js';
-import {apiLimiter} from './middleware/rateLimiter.js';
+import { globalErrorHandler, notFound } from './middleware/errorHandler.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -24,10 +24,12 @@ const app = express();
 
 // ── Security middleware ───────────────────────────────
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+  })
+);
 app.use(mongoSanitize());
 
 // ── Body parsing ─────────────────────────────────────

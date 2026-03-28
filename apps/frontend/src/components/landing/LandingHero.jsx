@@ -22,13 +22,17 @@ export default function LandingHero() {
         </h1>
 
         <p className="mt-6 max-w-2xl mx-auto text-zinc-600 text-lg">
-          LINK connecte etudiants, ecoles et entreprises autour des offres, candidatures et retours d'experience,
-          dans une plateforme unique.
+          LINK connecte etudiants, ecoles et entreprises autour des offres, candidatures et retours
+          d'experience, dans une plateforme unique.
         </p>
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link to="/register-school" className="btn-primary">Creer un espace ecole</Link>
-          <Link to="/login" className="btn-secondary">Se connecter</Link>
+          <Link to="/register-school" className="btn-primary">
+            Creer un espace ecole
+          </Link>
+          <Link to="/login" className="btn-secondary">
+            Se connecter
+          </Link>
         </div>
 
         <div className="mt-14 card max-w-5xl mx-auto border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40">

@@ -4,7 +4,7 @@ const notFound = (req, res, next) => {
   next(error);
 };
 
-const globalErrorHandler = (err, req, res, next) => {
+const globalErrorHandler = (err, req, res, _next) => {
   const statusCode = err.statusCode || 500;
   const status = statusCode < 500 ? 'fail' : 'error';
 
@@ -35,7 +35,9 @@ const globalErrorHandler = (err, req, res, next) => {
     return res.status(statusCode).json({ status, message: err.message, stack: err.stack });
   }
 
-  return res.status(statusCode).json({ status, message: statusCode < 500 ? err.message : 'Something went wrong' });
+  return res
+    .status(statusCode)
+    .json({ status, message: statusCode < 500 ? err.message : 'Something went wrong' });
 };
 
 export { notFound, globalErrorHandler };

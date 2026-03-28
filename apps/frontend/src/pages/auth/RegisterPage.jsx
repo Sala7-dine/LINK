@@ -16,7 +16,11 @@ const schema = z.object({
 export default function RegisterPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({ resolver: zodResolver(schema) });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({ resolver: zodResolver(schema) });
 
   const onSubmit = async (values) => {
     try {
@@ -25,7 +29,7 @@ export default function RegisterPage() {
       toast.success('Bienvenue ! Vérifiez votre email.');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Erreur lors de l\'inscription');
+      toast.error(err.response?.data?.message || "Erreur lors de l'inscription");
     }
   };
 
@@ -35,19 +39,37 @@ export default function RegisterPage() {
       <p className="text-gray-500 dark:text-gray-400 mb-8">Rejoignez la communauté LINK</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom complet</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Nom complet
+          </label>
           <input {...register('name')} type="text" className="input" placeholder="Votre nom" />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-          <input {...register('email')} type="email" className="input" placeholder="vous@exemple.com" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Email
+          </label>
+          <input
+            {...register('email')}
+            type="email"
+            className="input"
+            placeholder="vous@exemple.com"
+          />
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mot de passe</label>
-          <input {...register('password')} type="password" className="input" placeholder="Min. 8 caractères" />
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Mot de passe
+          </label>
+          <input
+            {...register('password')}
+            type="password"
+            className="input"
+            placeholder="Min. 8 caractères"
+          />
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+          )}
         </div>
         <button type="submit" disabled={isSubmitting} className="btn-primary w-full">
           {isSubmitting ? 'Création...' : 'Créer mon compte'}
@@ -55,7 +77,9 @@ export default function RegisterPage() {
       </form>
       <p className="mt-6 text-center text-sm text-gray-500">
         Déjà un compte ?{' '}
-        <Link to="/login" className="text-primary-600 font-medium hover:underline">Se connecter</Link>
+        <Link to="/login" className="text-primary-600 font-medium hover:underline">
+          Se connecter
+        </Link>
       </p>
     </div>
   );

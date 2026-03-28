@@ -1,4 +1,8 @@
-import { loginSchema, registerSchoolSchema, resetPasswordSchema } from '../../validations/authValidation.js';
+import {
+  loginSchema,
+  registerSchoolSchema,
+  resetPasswordSchema,
+} from '../../validations/authValidation.js';
 
 describe('loginSchema', () => {
   it('validates correct credentials', async () => {
@@ -7,15 +11,21 @@ describe('loginSchema', () => {
   });
 
   it('rejects missing email', async () => {
-    await expect(loginSchema.validate({ password: 'secret123' })).rejects.toThrow('email is required');
+    await expect(loginSchema.validate({ password: 'secret123' })).rejects.toThrow(
+      'email is required'
+    );
   });
 
   it('rejects invalid email format', async () => {
-    await expect(loginSchema.validate({ email: 'not-an-email', password: 'secret123' })).rejects.toThrow('valid email');
+    await expect(
+      loginSchema.validate({ email: 'not-an-email', password: 'secret123' })
+    ).rejects.toThrow('valid email');
   });
 
   it('rejects missing password', async () => {
-    await expect(loginSchema.validate({ email: 'test@example.com' })).rejects.toThrow('password is required');
+    await expect(loginSchema.validate({ email: 'test@example.com' })).rejects.toThrow(
+      'password is required'
+    );
   });
 });
 
@@ -33,15 +43,21 @@ describe('registerSchoolSchema', () => {
   });
 
   it('rejects missing schoolName', async () => {
-    await expect(registerSchoolSchema.validate({ ...valid, schoolName: '' })).rejects.toThrow('School name is required');
+    await expect(registerSchoolSchema.validate({ ...valid, schoolName: '' })).rejects.toThrow(
+      'School name is required'
+    );
   });
 
   it('rejects invalid adminEmail', async () => {
-    await expect(registerSchoolSchema.validate({ ...valid, adminEmail: 'not-email' })).rejects.toThrow('valid email');
+    await expect(
+      registerSchoolSchema.validate({ ...valid, adminEmail: 'not-email' })
+    ).rejects.toThrow('valid email');
   });
 
   it('rejects password shorter than 8 chars', async () => {
-    await expect(registerSchoolSchema.validate({ ...valid, password: '1234' })).rejects.toThrow('8 characters');
+    await expect(registerSchoolSchema.validate({ ...valid, password: '1234' })).rejects.toThrow(
+      '8 characters'
+    );
   });
 });
 
@@ -52,7 +68,9 @@ describe('resetPasswordSchema', () => {
   });
 
   it('rejects password shorter than 8 chars', async () => {
-    await expect(resetPasswordSchema.validate({ password: 'weak' })).rejects.toThrow('8 characters');
+    await expect(resetPasswordSchema.validate({ password: 'weak' })).rejects.toThrow(
+      '8 characters'
+    );
   });
 
   it('rejects empty password', async () => {
