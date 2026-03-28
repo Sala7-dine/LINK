@@ -102,6 +102,11 @@ jobs:
       - name: Push backend image
         run: docker push registry.heroku.com/${{ secrets.HEROKU_BACKEND_APP }}/web
 
+      - name: Set Heroku stack to container (backend)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku stack:set container --app ${{ secrets.HEROKU_BACKEND_APP }}
+
       - name: Release backend on Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -136,6 +141,11 @@ jobs:
 
       - name: Push frontend image
         run: docker push registry.heroku.com/${{ secrets.HEROKU_FRONTEND_APP }}/web
+
+      - name: Set Heroku stack to container (frontend)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku stack:set container --app ${{ secrets.HEROKU_FRONTEND_APP }}
 
       - name: Release frontend on Heroku
         env:
