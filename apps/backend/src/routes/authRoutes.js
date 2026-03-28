@@ -48,11 +48,5 @@ router.get(
   oauthCallback
 );
 
-router.get('/github', passport.authenticate('github', { scope: ['user:email'], session: false }));
-router.get(
-  '/github/callback',
-  passport.authenticate('github', { session: false, failureRedirect: '/login' }),
-  oauthCallback
-);
 
 export default router;
