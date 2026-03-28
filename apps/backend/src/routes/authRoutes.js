@@ -48,5 +48,4 @@ router.get(
   oauthCallback
 );
 
-
 export default router;
