@@ -1,5 +1,22 @@
 name: LINK CI/CD
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Secrets GitHub requis :
+#   HEROKU_API_KEY        → clé API Heroku (Account Settings > API Key)
+#   HEROKU_BACKEND_APP    → nom de l'app Heroku backend  (ex: link-api-prod)
+#   HEROKU_FRONTEND_APP   → nom de l'app Heroku frontend (ex: link-app-prod)
+#
+# Variables de config Heroku à définir via Dashboard > Settings > Config Vars :
+#   Backend  : MONGO_URI, JWT_SECRET, JWT_REFRESH_SECRET, CLIENT_URL,
+#              GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+#              GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET,
+#              SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM
+#   Frontend : (aucune — l'URL API est injectée au build via VITE_API_URL)
+#
+# Note nginx : Heroku assigne un $PORT dynamique. S'assurer que
+#   docker/frontend/nginx.conf utilise `listen $PORT` via un script d'entrée.
+# ─────────────────────────────────────────────────────────────────────────────
+
 on:
   push:
     branches: [main, develop]
@@ -29,7 +46,7 @@ jobs:
       - name: Lint frontend
         run: npm run lint --workspace=apps/frontend
 
-  # ── Lint & Test ──────────────────────────────────────
+  # ── Test ─────────────────────────────────────────────
   test:
     runs-on: ubuntu-latest
     services:
@@ -57,71 +74,70 @@ jobs:
           JWT_REFRESH_SECRET: test_refresh_secret
         run: npm run test --workspace=apps/backend --if-present
 
-  # ── Build Docker images ──────────────────────────────
-  build:
+  # ── Deploy Backend → Heroku Container Registry ───────
+  deploy-backend:
     runs-on: ubuntu-latest
     needs: [lint, test]
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & push backend
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/backend/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/link-backend:latest,${{ secrets.DOCKERHUB_USERNAME }}/link-backend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build & push frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/frontend/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/link-frontend:latest,${{ secrets.DOCKERHUB_USERNAME }}/link-frontend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ── Deploy to AWS ECS ────────────────────────────────
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
     if: github.ref == 'refs/heads/main'
     environment: production
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Deploy backend to ECS
-        run: |
-          aws ecs update-service \
-            --cluster link-cluster \
-            --service link-backend \
-            --force-new-deployment
+      - name: Login to Heroku Container Registry
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
 
-      - name: Deploy frontend to ECS
+      - name: Build backend Docker image
         run: |
-          aws ecs update-service \
-            --cluster link-cluster \
-            --service link-frontend \
-            --force-new-deployment
+          docker build \
+            -f docker/backend/Dockerfile \
+            -t registry.heroku.com/${{ secrets.HEROKU_BACKEND_APP }}/web \
+            .
+
+      - name: Push backend image
+        run: docker push registry.heroku.com/${{ secrets.HEROKU_BACKEND_APP }}/web
+
+      - name: Release backend on Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:release web --app ${{ secrets.HEROKU_BACKEND_APP }}
+
+  # ── Deploy Frontend → Heroku Container Registry ──────
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Login to Heroku Container Registry
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
+
+      - name: Build frontend Docker image
+        # VITE_API_URL pointe vers l'app backend Heroku pour les appels API en prod
+        run: |
+          docker build \
+            -f docker/frontend/Dockerfile \
+            --build-arg VITE_API_URL=https://${{ secrets.HEROKU_BACKEND_APP }}.herokuapp.com \
+            -t registry.heroku.com/${{ secrets.HEROKU_FRONTEND_APP }}/web \
+            .
+
+      - name: Push frontend image
+        run: docker push registry.heroku.com/${{ secrets.HEROKU_FRONTEND_APP }}/web
+
+      - name: Release frontend on Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:release web --app ${{ secrets.HEROKU_FRONTEND_APP }}
