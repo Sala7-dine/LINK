@@ -11,7 +11,7 @@ name: LINK CI/CD
 #              GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
 #              GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET,
 #              SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM
-#   Frontend : (aucune — l'URL API est injectée au build via VITE_API_URL)
+#   Frontend : BACKEND_URL=https://link-api-prod-xxx.herokuapp.com (injecté dans nginx au démarrage)
 #
 # Note nginx : Heroku assigne un $PORT dynamique. S'assurer que
 #   docker/frontend/nginx.conf utilise `listen $PORT` via un script d'entrée.
@@ -131,11 +131,9 @@ jobs:
         run: echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
 
       - name: Build frontend Docker image
-        # VITE_API_URL pointe vers l'app backend Heroku pour les appels API en prod
         run: |
           docker build \
             -f docker/frontend/Dockerfile \
-            --build-arg VITE_API_URL=https://${{ secrets.HEROKU_BACKEND_APP }}.herokuapp.com \
             -t registry.heroku.com/${{ secrets.HEROKU_FRONTEND_APP }}/web \
             .
 
