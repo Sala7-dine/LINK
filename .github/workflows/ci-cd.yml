@@ -11,7 +11,7 @@ name: LINK CI/CD
 #              GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
 #              GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET,
 #              SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM
-#   Frontend : BACKEND_URL=https://link-api-prod-xxx.herokuapp.com (injecté dans nginx au démarrage)
+#   Frontend : (aucune — URL backend hardcodée dans nginx.conf)
 #
 # Note nginx : Heroku assigne un $PORT dynamique. S'assurer que
 #   docker/frontend/nginx.conf utilise `listen $PORT` via un script d'entrée.
@@ -144,14 +144,6 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku stack:set container --app ${{ secrets.HEROKU_FRONTEND_APP }}
-
-      - name: Set BACKEND_URL config var on frontend app
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          heroku config:set \
-            BACKEND_URL=https://${{ secrets.HEROKU_BACKEND_APP }}.herokuapp.com \
-            --app ${{ secrets.HEROKU_FRONTEND_APP }}
 
       - name: Release frontend on Heroku
         env:

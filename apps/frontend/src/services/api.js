@@ -3,7 +3,7 @@ import { store } from '../store';
 import { setCredentials, logout } from '../store/slices/authSlice';
 
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: 'https://link-api-prod-91a7bbeabe23.herokuapp.com/api/v1',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -23,7 +23,10 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const refreshToken = store.getState().auth.refreshToken;
-        const { data } = await axios.post('/api/v1/auth/refresh', { token: refreshToken });
+        const { data } = await axios.post(
+          'https://link-api-prod-91a7bbeabe23.herokuapp.com/api/v1/auth/refresh',
+          { token: refreshToken }
+        );
         store.dispatch(setCredentials({ ...data.data, user: store.getState().auth.user }));
         original.headers.Authorization = `Bearer ${data.data.accessToken}`;
         return api(original);
