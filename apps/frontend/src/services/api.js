@@ -23,7 +23,10 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const refreshToken = store.getState().auth.refreshToken;
-        const { data } = await axios.post(`${import.meta.env.VITE_API_URL || ''}/api/v1/auth/refresh`, { token: refreshToken });
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_URL || ''}/api/v1/auth/refresh`,
+          { token: refreshToken }
+        );
         store.dispatch(setCredentials({ ...data.data, user: store.getState().auth.user }));
         original.headers.Authorization = `Bearer ${data.data.accessToken}`;
         return api(original);
